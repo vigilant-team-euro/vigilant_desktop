@@ -25,4 +25,18 @@ QPushButton:hover {
     background-color: #45a049;
 }
 
-/* Add more styles as needed */
+
+/* CameraPage styling */
+#CameraPage {
+    background-color: #f110f0;
+}
+
+/* EmployeePage styling */
+#EmployeePage {
+    background-color: #e0e0e0;
+}
+
+/* StorePage styling */
+#StorePage {
+    background-color: #d0d0d0;
+}

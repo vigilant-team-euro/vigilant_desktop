@@ -1,1 +1,1 @@
-        file_menu.addAction(logout_action)
+            logout_action.triggered.connect(self.logout)
