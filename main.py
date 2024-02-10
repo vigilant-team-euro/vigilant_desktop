@@ -1,6 +1,7 @@
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtCore import Qt
 import utils
 # Import the style file
 
@@ -15,6 +16,10 @@ class LoginScreen(QDialog):
         self.setGeometry(300, 300, 300, 150)
         self.center_on_screen()
         layout = QVBoxLayout()
+        
+        self.vigilant_label = QLabel('Vigilant')
+        self.vigilant_label.setStyleSheet("font-size: 30pt; color: blue; font-weight: bold;")
+        self.vigilant_label.setAlignment(Qt.AlignHCenter)
 
         self.username_label = QLabel('Username:')
         self.username_input = QLineEdit(self)
@@ -26,6 +31,7 @@ class LoginScreen(QDialog):
         self.login_button = QPushButton('Login', self)
         self.login_button.clicked.connect(self.handle_login)
 
+        layout.addWidget(self.vigilant_label)
         layout.addWidget(self.username_label)
         layout.addWidget(self.username_input)
         layout.addWidget(self.password_label)
@@ -38,13 +44,15 @@ class LoginScreen(QDialog):
         with open('styles.qss', 'r') as style_file:
             self.setStyleSheet(style_file.read())
             
+        self.rejected.connect(sys.exit)
+            
     def center_on_screen(self):
         # Get the screen geometry
         screen_geometry = QDesktopWidget().screenGeometry()
 
         # Calculate the center of the screen
         x = (screen_geometry.width() - self.width()) // 2
-        y = ((screen_geometry.height() - self.height()) // 5)*2
+        y = ((screen_geometry.height() - self.height()) // 5) * 2
 
         # Set the position of the main window
         self.move(x, y)
