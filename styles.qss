@@ -7,6 +7,17 @@ QLabel {
     font-size: 15px;
 }
 
+QLabel#vigilant_label {
+    font-size: 40px;
+    color: blue;
+    font-weight: bold;
+}
+
+QLabel#description_label {
+    font-size: 20px;
+    font: italic;
+}
+
 QLineEdit {
     font-size: 14px;
     padding: 5px;

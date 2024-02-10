@@ -18,8 +18,12 @@ class LoginScreen(QDialog):
         layout = QVBoxLayout()
         
         self.vigilant_label = QLabel('Vigilant')
-        self.vigilant_label.setStyleSheet("font-size: 30pt; color: blue; font-weight: bold;")
+        self.vigilant_label.setObjectName("vigilant_label")
         self.vigilant_label.setAlignment(Qt.AlignHCenter)
+        
+        self.description_label = QLabel('Welcome to Vigilant Desktop Application!\nPlease login to continue.')
+        self.description_label.setObjectName("description_label")
+        self.description_label.setAlignment(Qt.AlignHCenter)
 
         self.username_label = QLabel('Username:')
         self.username_input = QLineEdit(self)
@@ -32,6 +36,7 @@ class LoginScreen(QDialog):
         self.login_button.clicked.connect(self.handle_login)
 
         layout.addWidget(self.vigilant_label)
+        layout.addWidget(self.description_label)
         layout.addWidget(self.username_label)
         layout.addWidget(self.username_input)
         layout.addWidget(self.password_label)
