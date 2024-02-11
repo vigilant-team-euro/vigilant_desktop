@@ -1,9 +1,15 @@
 import sys
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 import utils
-# Import the style file
+
+login_image_path = 'images/shopView.jpeg'
+login_screen_x = 300
+login_screen_y = 300
+login_screen_width = 300
+login_screen_height = 150
+
 
 class LoginScreen(QDialog):
     def __init__(self):
@@ -13,9 +19,20 @@ class LoginScreen(QDialog):
 
     def init_ui(self):
         self.setWindowTitle('Login')
-        self.setGeometry(300, 300, 300, 150)
+        self.setGeometry(login_screen_x, login_screen_y, login_screen_width, login_screen_height)
         self.center_on_screen()
-        layout = QVBoxLayout()
+        
+        main_layout = QHBoxLayout()
+        
+        pixmap = QPixmap(login_image_path)
+        label = QLabel()
+        label.setPixmap(pixmap)
+        label.setScaledContents(True)
+        main_layout.addWidget(label)
+        label.setMinimumSize(login_screen_width, login_screen_height)
+        label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        
+        login_layout = QVBoxLayout()
         
         self.vigilant_label = QLabel('Vigilant')
         self.vigilant_label.setObjectName("vigilant_label")
@@ -35,15 +52,17 @@ class LoginScreen(QDialog):
         self.login_button = QPushButton('Login', self)
         self.login_button.clicked.connect(self.handle_login)
 
-        layout.addWidget(self.vigilant_label)
-        layout.addWidget(self.description_label)
-        layout.addWidget(self.username_label)
-        layout.addWidget(self.username_input)
-        layout.addWidget(self.password_label)
-        layout.addWidget(self.password_input)
-        layout.addWidget(self.login_button)
+        login_layout.addWidget(self.vigilant_label)
+        login_layout.addWidget(self.description_label)
+        login_layout.addWidget(self.username_label)
+        login_layout.addWidget(self.username_input)
+        login_layout.addWidget(self.password_label)
+        login_layout.addWidget(self.password_input)
+        login_layout.addWidget(self.login_button)
 
-        self.setLayout(layout)
+        main_layout.addLayout(login_layout)
+        
+        self.setLayout(main_layout)
 
         # Apply style to the login screen
         with open('styles.qss', 'r') as style_file:
@@ -63,8 +82,8 @@ class LoginScreen(QDialog):
         self.move(x, y)
 
     def handle_login(self):
-        username = self.username_input.text()
-        password = self.password_input.text()
+        username = self.username_input.text().strip()
+        password = self.password_input.text().strip()
 
         # Add your authentication logic here
         if utils.auth_user(username, password):
@@ -200,7 +219,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
 
     # Set application icon
-    app.setWindowIcon(QIcon('icon.png'))  # Replace 'icon.png' with your icon file
+    #app.setWindowIcon(QIcon('images/logo.png'))
 
     login_screen = LoginScreen()
     if login_screen.exec_() == QDialog.Accepted:
