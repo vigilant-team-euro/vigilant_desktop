@@ -3,6 +3,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtCore import Qt
 import utils
+
+from firebase_admin import credentials, auth, initialize_app
 # Import the style file
 
 class LoginScreen(QDialog):
@@ -45,6 +47,9 @@ class LoginScreen(QDialog):
             self.setStyleSheet(style_file.read())
             
         self.rejected.connect(sys.exit)
+        
+        cred = credentials.Certificate(utils.FIREBASE_CONFIG_FILE)
+        self.firebase_app = initialize_app(cred)
             
     def center_on_screen(self):
         # Get the screen geometry

@@ -1,6 +1,17 @@
+from firebase_admin import auth
+
+FIREBASE_CONFIG_FILE = 'firebaseConfig.json'
+
 #auth from firebase, return True if success
 def auth_user(username, password):
-    return True
+    try:
+        user = auth.get_user_by_email(username)
+    except auth.UserNotFoundError:
+        return False
+    except Exception as e:
+        return False
+    finally:
+        return True
 
 #logout from firebase, return True if success
 def is_user_logged_out():
