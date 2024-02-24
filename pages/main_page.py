@@ -1,95 +1,9 @@
 import sys
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import Qt
 import utils
-
-login_image_path = 'images/shopView.jpeg'
-login_screen_x = 300
-login_screen_y = 300
-login_screen_width = 300
-login_screen_height = 150
-
-
-class LoginScreen(QDialog):
-    def __init__(self):
-        super().__init__()
-
-        self.init_ui()
-
-    def init_ui(self):
-        self.setWindowTitle('Login')
-        self.setGeometry(login_screen_x, login_screen_y, login_screen_width, login_screen_height)
-        self.center_on_screen()
-        
-        main_layout = QHBoxLayout()
-        
-        pixmap = QPixmap(login_image_path)
-        label = QLabel()
-        label.setPixmap(pixmap)
-        label.setScaledContents(True)
-        main_layout.addWidget(label)
-        label.setMinimumSize(login_screen_width, login_screen_height)
-        label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        
-        login_layout = QVBoxLayout()
-        
-        self.vigilant_label = QLabel('Vigilant')
-        self.vigilant_label.setObjectName("vigilant_label")
-        self.vigilant_label.setAlignment(Qt.AlignHCenter)
-        
-        self.description_label = QLabel('Welcome to Vigilant Desktop Application!\nPlease login to continue.')
-        self.description_label.setObjectName("description_label")
-        self.description_label.setAlignment(Qt.AlignHCenter)
-
-        self.username_label = QLabel('Username:')
-        self.username_input = QLineEdit(self)
-
-        self.password_label = QLabel('Password:')
-        self.password_input = QLineEdit(self)
-        self.password_input.setEchoMode(QLineEdit.Password)
-
-        self.login_button = QPushButton('Login', self)
-        self.login_button.clicked.connect(self.handle_login)
-
-        login_layout.addWidget(self.vigilant_label)
-        login_layout.addWidget(self.description_label)
-        login_layout.addWidget(self.username_label)
-        login_layout.addWidget(self.username_input)
-        login_layout.addWidget(self.password_label)
-        login_layout.addWidget(self.password_input)
-        login_layout.addWidget(self.login_button)
-
-        main_layout.addLayout(login_layout)
-        
-        self.setLayout(main_layout)
-
-        # Apply style to the login screen
-        with open('styles.qss', 'r') as style_file:
-            self.setStyleSheet(style_file.read())
-            
-        self.rejected.connect(sys.exit)
-            
-    def center_on_screen(self):
-        # Get the screen geometry
-        screen_geometry = QDesktopWidget().screenGeometry()
-
-        # Calculate the center of the screen
-        x = (screen_geometry.width() - self.width()) // 2
-        y = ((screen_geometry.height() - self.height()) // 5) * 2
-
-        # Set the position of the main window
-        self.move(x, y)
-
-    def handle_login(self):
-        username = self.username_input.text().strip()
-        password = self.password_input.text().strip()
-
-        # Add your authentication logic here
-        if utils.auth_user(username, password):
-            self.accept()
-        else:
-            QMessageBox.warning(self, 'Login Failed', 'Invalid username or password')
+from pages.login_page import LoginScreen
 
 class CameraPage(QWidget):
     def __init__(self):
@@ -213,17 +127,3 @@ class MainWindow(QMainWindow):
             self.show()
     def switch_page(self, page):
         self.stacked_widget.setCurrentWidget(page)
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-
-    # Set application icon
-    #app.setWindowIcon(QIcon('images/logo.png'))
-
-    login_screen = LoginScreen()
-    if login_screen.exec_() == QDialog.Accepted:
-        main_window = MainWindow()
-        main_window.show()
-
-    sys.exit(app.exec_())
