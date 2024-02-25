@@ -1,16 +1,15 @@
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import Qt
 
-class MainPage(QWidget):
+class EmployeePage(QWidget):
     def __init__(self):
         super().__init__()
 
         self.init_ui()
 
     def init_ui(self):
-        self.setObjectName("MainPage")
+        self.setObjectName("EmployeePage")
         layout = QVBoxLayout()
-        label = QLabel('Main Page')
+        label = QLabel('Employee Page')
         layout.addWidget(label)
         self.setLayout(layout)
-
-
