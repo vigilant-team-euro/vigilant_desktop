@@ -37,9 +37,9 @@ class MainWindow(QMainWindow):
 
       self.stacked_widget.addWidget(self.main_page)
       self.stacked_widget.addWidget(self.camera_page)
-      self.stacked_widget.addWidget(self.employee_page)
       self.stacked_widget.addWidget(self.video_page)
-      self.stacked_widget.setCurrentWidget(self.camera_page)
+      self.stacked_widget.addWidget(self.employee_page)
+      self.stacked_widget.setCurrentWidget(self.main_page)
 
       # Create actions to switch between pages
       main_action = QAction('Main Page', self)
@@ -54,11 +54,10 @@ class MainWindow(QMainWindow):
       video_action = QAction('Video Page', self)
       video_action.triggered.connect(lambda: self.switch_page(self.video_page))
 
-
       menubar.addAction(main_action)
       menubar.addAction(camera_action)
-      menubar.addAction(employee_action)
       menubar.addAction(video_action)
+      menubar.addAction(employee_action)
       
       with open('styles/main_window_styles.qss', 'r') as style_file:
          self.setStyleSheet(style_file.read())
