@@ -59,6 +59,9 @@ class MainWindow(QMainWindow):
       menubar.addAction(camera_action)
       menubar.addAction(employee_action)
       menubar.addAction(video_action)
+      
+      with open('styles/main_window_styles.qss', 'r') as style_file:
+         self.setStyleSheet(style_file.read())
 
    def center_on_screen(self):
       # Get the screen geometry
