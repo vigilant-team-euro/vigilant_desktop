@@ -5,13 +5,15 @@ QLabel#camera_label{
    margin-bottom: 20px;
    background: transparent;
    border: none;
+   color: white;
 }
 
-QLabel#add_camera_label, QLabel#process_description_label, QLabel#delete_camera_label {
+QLabel#registered_cameras_label, QLabel#add_camera_label, QLabel#process_description_label, QLabel#delete_camera_label {
    font-size: 22px;
    font-family: 'Arial', 'Cochin', Georgia, Times, 'Times New Roman';
    margin-top: 20px;
    margin-bottom: 80px;
+   border: none;
 }
 
 QLabel#add_camera_label, QLabel#delete_camera_label, QLabel#process_description_label, QLabel#process_description_label{

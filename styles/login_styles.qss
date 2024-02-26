@@ -1,18 +1,18 @@
 /* Example style */
 QDialog {
-    background-color: #e4f2fd;
+    background-color: #2a3447;
     border: 1px solid #ccc;
     border-radius: 10px;
 }
 
 QLabel {
     font-size: 18px;
-    font-family: 'Arial'
+    font-family: 'Arial';
+    color: white;
 }
 
 QLabel#vigilant_label {
     font-size: 40px;
-    color: rgb(0, 0, 255);
     font-weight: bold;
     font-family: 'Cambria', 'Cochin', Georgia, Times, 'Times New Roman';
     margin: 20px;
@@ -21,6 +21,7 @@ QLabel#vigilant_label {
 QLabel#description_label {
     font-size: 20px;
     font: italic;
+    margin-top: 20px;
     margin-bottom: 30px;
 }
 

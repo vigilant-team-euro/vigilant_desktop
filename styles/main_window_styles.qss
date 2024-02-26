@@ -1,5 +1,5 @@
 QMainWindow {
-   background-color: #e4f2fd;
+   background-color: #2a3447;
 }
 
 QLabel {

@@ -10,6 +10,7 @@ QLabel#video_label{
    margin-bottom: 20px;
    background: transparent;
    border: none;
+   color: white;
 }
 
 QLabel#video_upload_description {

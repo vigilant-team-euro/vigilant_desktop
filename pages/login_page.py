@@ -7,7 +7,7 @@ import utils
 login_image_path = 'images/shopView.jpeg'
 login_screen_x = 300
 login_screen_y = 300
-login_screen_width = 300
+login_screen_width = 400
 login_screen_height = 150
 
 class LoginScreen(QDialog):
@@ -29,13 +29,15 @@ class LoginScreen(QDialog):
         label.setPixmap(pixmap)
         label.setScaledContents(True)
         main_layout.addWidget(label)
-        label.setMinimumSize(450, login_screen_height)
+        label.setMinimumSize(600, login_screen_height)
         label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
         login_layout = QVBoxLayout()
         
-        self.vigilant_label = QLabel('Vigilant')
-        self.vigilant_label.setObjectName("vigilant_label")
+        vigilant_pixmap = QPixmap('images/vigilant_logo.png')
+        self.vigilant_label = QLabel()
+        self.vigilant_label.setPixmap(vigilant_pixmap)
+        #self.vigilant_label.setObjectName("vigilant_label")
         self.vigilant_label.setAlignment(Qt.AlignHCenter)
         
         self.description_label = QLabel('Welcome to Vigilant Desktop Application!\nPlease login to continue.')

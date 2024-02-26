@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QDateTime
+from PyQt5.QtCore import Qt, QDateTime, QModelIndex
+from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
 class CameraPage(QWidget):
     
@@ -17,6 +18,7 @@ class CameraPage(QWidget):
       self.camera_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
    
       tabs = QTabWidget()
+      tabs.addTab(self.available_cameras_tab(), "Available Cameras")
       tabs.addTab(self.add_camera_tab(), "Add Camera")
       tabs.addTab(self.delete_camera_tab(), "Delete Camera")
       tabs.addTab(self.process_camera_footage_tab(), "Process Camera Footage")
@@ -28,7 +30,82 @@ class CameraPage(QWidget):
       
       with open('styles/camera_styles.qss', 'r') as style_file:
          self.setStyleSheet(style_file.read())
-        
+   
+   def available_cameras_tab(self):
+      
+      # class ButtonDelegate(QWidget):
+      #    def __init__(self, parent=None):
+      #       super().__init__(parent)
+      #       self.button = QPushButton('Click Me', self)
+      #       layout = QHBoxLayout(self)
+      #       layout.addWidget(self.button)
+      #       layout.setAlignment(Qt.AlignCenter)
+      #       layout.setContentsMargins(0, 0, 0, 0)
+      #       self.setLayout(layout)
+
+      # class ButtonDelegateModel(QStandardItemModel):
+      #    def __init__(self, parent=None):
+      #       super().__init__(parent)
+
+      #    def rowCount(self, parent=QModelIndex()):
+      #       return super().rowCount(parent)
+
+      #    def columnCount(self, parent=QModelIndex()):
+      #       return super().columnCount(parent) + 1
+
+      #    def data(self, index, role=Qt.DisplayRole):
+      #       if role == Qt.DisplayRole and index.column() == self.columnCount() - 1:
+      #             return ''
+      #       return super().data(index, role)
+
+      #    def flags(self, index):
+      #       if index.column() == self.columnCount() - 1:
+      #             return Qt.ItemIsEnabled
+      #       return super().flags(index)
+
+      #    def setData(self, index, value, role=Qt.EditRole):
+      #       return False
+      
+      
+      registered_cameras_tab = QWidget()
+      registered_cameras_layout = QVBoxLayout()
+      
+      self.registered_cameras_label = QLabel('Registered Cameras')
+      self.registered_cameras_label.setObjectName("registered_cameras_label")
+      self.registered_cameras_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+      
+      table_view = QTableView()
+      
+      model = QStandardItemModel()
+      table_view.setModel(model)
+      
+      cameras = [
+            {"name": "Camera 1", "ip_address": "192.168.1.101", "store": "Store A"},
+            {"name": "Camera 2", "ip_address": "192.168.1.102", "store": "Store B"},
+            {"name": "Camera 3", "ip_address": "192.168.1.103", "store": "Store C"}
+        ]
+      
+      model.setHorizontalHeaderLabels(["Name", "IP Address", "Store", "Button"])
+      
+      for row, camera in enumerate(cameras):
+         name_item = QStandardItem(camera["name"])
+         ip_address_item = QStandardItem(camera["ip_address"])
+         store_item = QStandardItem(camera["store"])
+         button_item = QStandardItem('')
+         # button_item.setData(ButtonDelegate(), Qt.DisplayRole)
+
+         model.setItem(row, 0, name_item)
+         model.setItem(row, 1, ip_address_item)
+         model.setItem(row, 2, store_item)
+         # model.setItem(row, 3, button_item)
+
+      registered_cameras_layout.addWidget(self.registered_cameras_label)
+      registered_cameras_layout.addWidget(table_view)
+
+      registered_cameras_tab.setLayout(registered_cameras_layout)
+      
+      return registered_cameras_tab
+       
    def add_camera_tab(self):
       INPUT_WIDTH = 300
       
