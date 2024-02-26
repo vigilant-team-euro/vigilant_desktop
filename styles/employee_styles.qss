@@ -1,0 +1,59 @@
+QFrame {
+   background-color: #fdfdfd;
+   border: 1px solid #ccc;
+}
+
+QLabel#employee_label{
+   font-size: 30px;
+   font-style: italic;
+   font-family: 'Arial', 'Cochin', Georgia, Times, 'Times New Roman';
+   margin-bottom: 20px;
+   background: transparent;
+   border: none;
+}
+
+QLabel#employee_upload_description {
+   border: none;
+   font-size: 22px;
+   font-family: 'Arial', 'Cochin', Georgia, Times, 'Times New Roman';
+   margin-top: 20px;
+   margin-bottom: 80px;
+}
+
+QLabel#employee_name_label, QLabel#employee_surname_label, QLabel#upload_employee_image_label {
+   font-size: 20px;
+   border: none;
+}
+
+QPushButton#upload_employee_image_button{
+   font-size: 18px;
+   padding-top: 5px;
+   padding-bottom: 5px;
+   padding-inline: 20px;
+   margin: 5px;
+   background-color: #85a286;
+   color: white;
+   border-radius: 5px;
+}
+
+QPushButton#register_employee_button {
+   font-size: 18px;
+   padding: 10px 30px;
+   margin: 5px;
+   background-color: #4CAF50;
+   color: white;
+   border-radius: 10px;
+}
+
+QPushButton#register_employee_button:hover {
+   background-color: #45a049;
+}
+
+QLineEdit {
+   font-size: 18px;
+   padding: 5px;
+   margin: 5px;
+   border: 1px solid #ccc;
+   border-radius: 5px;
+   background-color: white;
+}
