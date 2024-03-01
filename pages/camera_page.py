@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QDateTime, QModelIndex
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 import utils
+import ipaddress
 
 class CameraPage(QWidget):
     
@@ -256,6 +257,10 @@ class CameraPage(QWidget):
    
    # UI Functionality
    def handle_add_camera(self):
+      error_message = QMessageBox()
+      error_message.setIcon(QMessageBox.Critical)
+      error_message.setWindowTitle("Error")
+      
       camera_name = self.camera_name_input.text().strip()
       camera_ip = self.camera_ip_input.text().strip()
       camera_port = self.camera_port_input.text().strip()
@@ -263,18 +268,57 @@ class CameraPage(QWidget):
       camera_password = self.camera_password_input.text().strip()
       store_name = "store_name" # CHANGE THIS WHEN THE FIREBASE INTEGRATION IS DONE
       
-      error = utils.add_camera(camera_name, camera_ip, camera_port, camera_username, camera_password, store_name)
+      if self.is_empty(camera_name) or self.is_empty(camera_ip) or self.is_empty(camera_port) or self.is_empty(camera_username) or self.is_empty(camera_password):
+         error_message.setText("Please fill in all the fields")
+         error_message.exec_()
+         return
       
-      if len(error) > 0:
-         msg = QMessageBox()
-         msg.setIcon(QMessageBox.Critical)
-         msg.setText(error)
-         msg.setWindowTitle("Error")
-         msg.exec_()
+      if not self.validate_ip_address(camera_ip):
+         error_message.setText("Please enter a valid IP address!")
+         error_message.exec_()
+         self.camera_ip_input.clear()
+         return
       
-      self.camera_name_input.clear()
-      self.camera_ip_input.clear()
-      self.camera_port_input.clear()
-      self.camera_username_input.clear()
-      self.camera_password_input.clear()
-      #self.store_name_combobox.setCurrentIndex(0)
+      if not self.validate_port_number(camera_port):
+         error_message.setText("Please enter a valid port number!")
+         error_message.exec_()
+         self.camera_port_input.clear()
+         return
+      
+      camera_port = int(camera_port)
+      
+      # DB Operation
+      db_error = utils.add_camera(camera_name, camera_ip, camera_port, camera_username, camera_password, store_name)
+      
+      if len(db_error) > 0:
+         error_message.setText(db_error)
+         error_message.exec_()
+         self.camera_name_input.clear()
+         self.camera_username_input.clear()
+         self.camera_password_input.clear()
+         #self.store_name_combobox.setCurrentIndex(0)
+         return
+
+      success_message = QMessageBox()
+      success_message.setIcon(QMessageBox.Information)
+      success_message.setWindowTitle("Success")
+      success_message.setText("Camera added successfully!")
+      success_message.exec_()
+      
+   # HELPER FUNCTIONS
+   def is_empty(self, value):
+      return len(value) == 0
+   
+   def validate_port_number(self, port_number):
+      try:
+         port = int(port_number)
+         return port > 0 and port < 65536
+      except ValueError:
+         return False
+      
+   def validate_ip_address(self, ip_address):
+      try:
+         ipaddress.ip_address(ip_address)
+         return True
+      except ValueError:
+         return False
