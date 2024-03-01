@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QDateTime, QModelIndex
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
+import utils
 
 class CameraPage(QWidget):
     
@@ -85,13 +86,13 @@ class CameraPage(QWidget):
             {"name": "Camera 3", "ip_address": "192.168.1.103", "store": "Store C"}
         ]
       
-      model.setHorizontalHeaderLabels(["Name", "IP Address", "Store", "Button"])
+      model.setHorizontalHeaderLabels(["Name", "IP Address", "Store"])
       
       for row, camera in enumerate(cameras):
          name_item = QStandardItem(camera["name"])
          ip_address_item = QStandardItem(camera["ip_address"])
          store_item = QStandardItem(camera["store"])
-         button_item = QStandardItem('')
+         # button_item = QStandardItem('')
          # button_item.setData(ButtonDelegate(), Qt.DisplayRole)
 
          model.setItem(row, 0, name_item)
@@ -165,6 +166,7 @@ class CameraPage(QWidget):
       
       self.add_camera_button = QPushButton('Add Camera')
       self.add_camera_button.setObjectName("add_camera_button")
+      self.add_camera_button.clicked.connect(self.handle_add_camera)
       #self.setFixedWidth(600)
       
       add_camera_layout.addWidget(self.add_camera_label)
@@ -251,3 +253,28 @@ class CameraPage(QWidget):
       process_camera_footage_tab.setLayout(process_camera_footage_layout)
       
       return process_camera_footage_tab
+   
+   # UI Functionality
+   def handle_add_camera(self):
+      camera_name = self.camera_name_input.text().strip()
+      camera_ip = self.camera_ip_input.text().strip()
+      camera_port = self.camera_port_input.text().strip()
+      camera_username = self.camera_username_input.text().strip()
+      camera_password = self.camera_password_input.text().strip()
+      store_name = "store_name" # CHANGE THIS WHEN THE FIREBASE INTEGRATION IS DONE
+      
+      error = utils.add_camera(camera_name, camera_ip, camera_port, camera_username, camera_password, store_name)
+      
+      if len(error) > 0:
+         msg = QMessageBox()
+         msg.setIcon(QMessageBox.Critical)
+         msg.setText(error)
+         msg.setWindowTitle("Error")
+         msg.exec_()
+      
+      self.camera_name_input.clear()
+      self.camera_ip_input.clear()
+      self.camera_port_input.clear()
+      self.camera_username_input.clear()
+      self.camera_password_input.clear()
+      #self.store_name_combobox.setCurrentIndex(0)
