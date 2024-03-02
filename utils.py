@@ -12,9 +12,14 @@ def auth_user(username, password):
 def is_user_logged_out():
     return True
 
-#camera utilies, use id of the cameras
 def get_cameras():
-    pass
+    db_file = os.path.join(CAMERA_INFO_FOLDER, CAMERA_INFO_DB_FILE)
+    connection = sqlite3.connect(db_file)
+    cursor = connection.cursor()
+    cursor.execute("SELECT camera_name, ip_address, store_name FROM cameras")
+    cameras = cursor.fetchall()
+    connection.close()
+    return cameras
 
 def add_camera(camera_name, camera_ip, camera_port, camera_username, camera_password, store_name):
     db_file = os.path.join(CAMERA_INFO_FOLDER, CAMERA_INFO_DB_FILE)

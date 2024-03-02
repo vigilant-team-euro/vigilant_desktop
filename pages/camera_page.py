@@ -76,33 +76,12 @@ class CameraPage(QWidget):
       self.registered_cameras_label.setObjectName("registered_cameras_label")
       self.registered_cameras_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
       
-      table_view = QTableView()
+      self.table_view = QTableView()
       
-      model = QStandardItemModel()
-      table_view.setModel(model)
-      
-      cameras = [
-            {"name": "Camera 1", "ip_address": "192.168.1.101", "store": "Store A"},
-            {"name": "Camera 2", "ip_address": "192.168.1.102", "store": "Store B"},
-            {"name": "Camera 3", "ip_address": "192.168.1.103", "store": "Store C"}
-        ]
-      
-      model.setHorizontalHeaderLabels(["Name", "IP Address", "Store"])
-      
-      for row, camera in enumerate(cameras):
-         name_item = QStandardItem(camera["name"])
-         ip_address_item = QStandardItem(camera["ip_address"])
-         store_item = QStandardItem(camera["store"])
-         # button_item = QStandardItem('')
-         # button_item.setData(ButtonDelegate(), Qt.DisplayRole)
-
-         model.setItem(row, 0, name_item)
-         model.setItem(row, 1, ip_address_item)
-         model.setItem(row, 2, store_item)
-         # model.setItem(row, 3, button_item)
+      self.update_camera_table()
 
       registered_cameras_layout.addWidget(self.registered_cameras_label)
-      registered_cameras_layout.addWidget(table_view)
+      registered_cameras_layout.addWidget(self.table_view)
 
       registered_cameras_tab.setLayout(registered_cameras_layout)
       
@@ -305,7 +284,34 @@ class CameraPage(QWidget):
       success_message.setText("Camera added successfully!")
       success_message.exec_()
       
+      # Reload the page
+      self.update_camera_table()
+      
    # HELPER FUNCTIONS
+   def update_camera_table(self):
+      model = QStandardItemModel()
+      self.table_view.setModel(model)
+      
+      cameras = utils.get_cameras()
+      cameras_dict = []
+      
+      for camera in cameras:
+         cameras_dict.append({"name": camera[0], "ip_address": camera[1], "store": camera[2]})
+      
+      model.setHorizontalHeaderLabels(["Name", "IP Address", "Store"])
+      
+      for row, camera in enumerate(cameras_dict):
+         name_item = QStandardItem(camera["name"])
+         ip_address_item = QStandardItem(camera["ip_address"])
+         store_item = QStandardItem(camera["store"])
+         # button_item = QStandardItem('')
+         # button_item.setData(ButtonDelegate(), Qt.DisplayRole)
+
+         model.setItem(row, 0, name_item)
+         model.setItem(row, 1, ip_address_item)
+         model.setItem(row, 2, store_item)
+   
+   
    def is_empty(self, value):
       return len(value) == 0
    
