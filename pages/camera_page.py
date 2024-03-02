@@ -174,11 +174,13 @@ class CameraPage(QWidget):
       self.choose_delete_camera_input = QComboBox()
       self.choose_delete_camera_input.setFixedWidth(INPUT_WIDTH)
       self.choose_delete_camera_input.setPlaceholderText('Choose camera')
+      self.update_camera_combobox()
       
       delete_camera_form_layout.addRow(self.choose_delete_camera_label, self.choose_delete_camera_input)
       
       self.delete_camera_button = QPushButton('Delete Camera')
       self.delete_camera_button.setObjectName("delete_camera_button")
+      self.delete_camera_button.clicked.connect(self.handle_delete_camera)
       
       delete_camera_layout.addWidget(self.delete_camera_label)
       delete_camera_layout.addLayout(delete_camera_form_layout)
@@ -286,6 +288,28 @@ class CameraPage(QWidget):
       
       # Reload the page
       self.update_camera_table()
+      self.update_camera_combobox()
+      
+   def handle_delete_camera(self):
+      deleted_camera_name = self.choose_delete_camera_input.currentText()
+      error = utils.remove_camera(deleted_camera_name)
+      
+      if len(error) > 0:
+         error_message = QMessageBox()
+         error_message.setIcon(QMessageBox.Critical)
+         error_message.setWindowTitle("Error")
+         error_message.setText("Failed to delete camera")
+         error_message.exec_()
+         return
+      
+      self.update_camera_combobox()
+      self.update_camera_table()
+      
+      success_message = QMessageBox()
+      success_message.setIcon(QMessageBox.Information)
+      success_message.setWindowTitle("Success")
+      success_message.setText("Camera added successfully!")
+      success_message.exec_()
       
    # HELPER FUNCTIONS
    def update_camera_table(self):
@@ -310,7 +334,13 @@ class CameraPage(QWidget):
          model.setItem(row, 0, name_item)
          model.setItem(row, 1, ip_address_item)
          model.setItem(row, 2, store_item)
-   
+         
+   def update_camera_combobox(self):
+      self.choose_delete_camera_input.clear()
+      cameras = utils.get_cameras()
+      for camera in cameras:
+         self.choose_delete_camera_input.addItem(camera[0])
+
    
    def is_empty(self, value):
       return len(value) == 0
