@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QDateTime, QModelIndex
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtCore import Qt, QDateTime
 import utils
 import ipaddress
 
@@ -35,40 +34,6 @@ class CameraPage(QWidget):
    
    def available_cameras_tab(self):
       
-      # class ButtonDelegate(QWidget):
-      #    def __init__(self, parent=None):
-      #       super().__init__(parent)
-      #       self.button = QPushButton('Click Me', self)
-      #       layout = QHBoxLayout(self)
-      #       layout.addWidget(self.button)
-      #       layout.setAlignment(Qt.AlignCenter)
-      #       layout.setContentsMargins(0, 0, 0, 0)
-      #       self.setLayout(layout)
-
-      # class ButtonDelegateModel(QStandardItemModel):
-      #    def __init__(self, parent=None):
-      #       super().__init__(parent)
-
-      #    def rowCount(self, parent=QModelIndex()):
-      #       return super().rowCount(parent)
-
-      #    def columnCount(self, parent=QModelIndex()):
-      #       return super().columnCount(parent) + 1
-
-      #    def data(self, index, role=Qt.DisplayRole):
-      #       if role == Qt.DisplayRole and index.column() == self.columnCount() - 1:
-      #             return ''
-      #       return super().data(index, role)
-
-      #    def flags(self, index):
-      #       if index.column() == self.columnCount() - 1:
-      #             return Qt.ItemIsEnabled
-      #       return super().flags(index)
-
-      #    def setData(self, index, value, role=Qt.EditRole):
-      #       return False
-      
-      
       registered_cameras_tab = QWidget()
       registered_cameras_layout = QVBoxLayout()
       
@@ -76,12 +41,13 @@ class CameraPage(QWidget):
       self.registered_cameras_label.setObjectName("registered_cameras_label")
       self.registered_cameras_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
       
-      self.table_view = QTableView()
+      self.table = QTableWidget()
+      self.table.setColumnCount(4)
       
       self.update_camera_table()
 
       registered_cameras_layout.addWidget(self.registered_cameras_label)
-      registered_cameras_layout.addWidget(self.table_view)
+      registered_cameras_layout.addWidget(self.table)
 
       registered_cameras_tab.setLayout(registered_cameras_layout)
       
@@ -311,37 +277,36 @@ class CameraPage(QWidget):
       success_message.setText("Camera added successfully!")
       success_message.exec_()
       
+   def handle_show_live_footage(self, camera_name):
+      utils.show_live_footage(camera_name)
+      
    # HELPER FUNCTIONS
    def update_camera_table(self):
-      model = QStandardItemModel()
-      self.table_view.setModel(model)
-      
       cameras = utils.get_cameras()
       cameras_dict = []
       
       for camera in cameras:
          cameras_dict.append({"name": camera[0], "ip_address": camera[1], "store": camera[2]})
       
-      model.setHorizontalHeaderLabels(["Name", "IP Address", "Store"])
+      self.table.setRowCount(len(cameras_dict))
+      self.table.setHorizontalHeaderLabels(["Camera Name", "IP Address", "Store", "Action"])
       
-      for row, camera in enumerate(cameras_dict):
-         name_item = QStandardItem(camera["name"])
-         ip_address_item = QStandardItem(camera["ip_address"])
-         store_item = QStandardItem(camera["store"])
-         # button_item = QStandardItem('')
-         # button_item.setData(ButtonDelegate(), Qt.DisplayRole)
-
-         model.setItem(row, 0, name_item)
-         model.setItem(row, 1, ip_address_item)
-         model.setItem(row, 2, store_item)
-         
+      for index in range(len(cameras_dict)):
+         camera = cameras_dict[index]
+         self.table.setItem(index, 0, QTableWidgetItem(camera["name"]))
+         self.table.setItem(index, 1, QTableWidgetItem(camera["ip_address"]))
+         self.table.setItem(index, 2, QTableWidgetItem(camera["store"]))
+         btn = QPushButton('Show Live Footage')
+         btn.setStyleSheet("background-color: #E1DEDD;")
+         self.table.setCellWidget(index, 3, btn)
+         btn.clicked.connect(lambda checked, cam=camera: self.handle_show_live_footage(cam["name"]))
+     
    def update_camera_combobox(self):
       self.choose_delete_camera_input.clear()
       cameras = utils.get_cameras()
       for camera in cameras:
          self.choose_delete_camera_input.addItem(camera[0])
 
-   
    def is_empty(self, value):
       return len(value) == 0
    
