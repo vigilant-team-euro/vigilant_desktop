@@ -278,7 +278,15 @@ class CameraPage(QWidget):
       success_message.exec_()
       
    def handle_show_live_footage(self, camera_name):
-      utils.show_live_footage(camera_name)
+      error = utils.show_live_footage(camera_name)
+      
+      if (len(error) > 0):
+         error_message = QMessageBox()
+         error_message.setIcon(QMessageBox.Critical)
+         error_message.setWindowTitle("Error")
+         error_message.setText(error)
+         error_message.exec_()
+         return
       
    # HELPER FUNCTIONS
    def update_camera_table(self):

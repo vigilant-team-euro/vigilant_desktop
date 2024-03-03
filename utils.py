@@ -5,6 +5,8 @@ import cv2
 CAMERA_INFO_FOLDER = "camera_info_data"
 CAMERA_INFO_DB_FILE = "camera_information.db"
 
+os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "timeout;1000"
+
 #auth from firebase, return True if success
 def auth_user(username, password):
     return True
@@ -63,6 +65,7 @@ def process_video():
     pass
 
 def show_live_footage(camera_name):
+    error = ""
     db_file = os.path.join(CAMERA_INFO_FOLDER, CAMERA_INFO_DB_FILE)
     connection = sqlite3.connect(db_file)
     cursor = connection.cursor()
@@ -81,8 +84,8 @@ def show_live_footage(camera_name):
     cap = cv2.VideoCapture(rtsp_url)
     
     if not cap.isOpened():
-        print("Failed to open RTSP stream")
-        exit()
+        error = "Failed to open RTSP stream"
+        return error
 
     while True:
         # Read a frame from the RTSP stream
@@ -90,8 +93,8 @@ def show_live_footage(camera_name):
 
         # Check if the frame is read correctly
         if not ret:
-            print("Failed to read frame")
-            break
+            error = "Failed to read frame"
+            return error
 
         # Display the frame
         cv2.imshow("RTSP Stream", frame)
@@ -103,3 +106,4 @@ def show_live_footage(camera_name):
     # Release the RTSP stream and close the window
     cap.release()
     cv2.destroyAllWindows()
+    return error
