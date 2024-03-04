@@ -18,14 +18,13 @@ class CameraPage(QWidget):
       self.camera_label.setAlignment(Qt.AlignHCenter)
       self.camera_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
    
-      tabs = QTabWidget()
-      tabs.addTab(self.available_cameras_tab(), "Available Cameras")
-      tabs.addTab(self.add_camera_tab(), "Add Camera")
-      tabs.addTab(self.delete_camera_tab(), "Delete Camera")
-      tabs.addTab(self.process_camera_footage_tab(), "Process Camera Footage")
+      self.tabs = QTabWidget()
       
+      self.tabs.addTab(self.available_cameras_tab(), "Available Cameras")
+      self.tabs.addTab(self.add_camera_tab(), "Add Camera")
+      self.tabs.addTab(self.process_camera_footage_tab(), "Process Camera Footage")
       camera_layout.addWidget(self.camera_label)
-      camera_layout.addWidget(tabs, alignment=Qt.AlignHCenter)
+      camera_layout.addWidget(self.tabs, alignment=Qt.AlignHCenter)
       
       self.setLayout(camera_layout)
       
@@ -42,9 +41,14 @@ class CameraPage(QWidget):
       self.registered_cameras_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
       
       self.table = QTableWidget()
-      self.table.setColumnCount(4)
+      self.table.setColumnCount(5)
       
       self.update_camera_table()
+      
+      header = self.table.horizontalHeader()
+      header.setDefaultSectionSize(self.tabs.size().width() // 5)  # Adjust column thickness
+      header = self.table.verticalHeader()
+      header.setDefaultSectionSize(50)   # Adjust row thickness
 
       registered_cameras_layout.addWidget(self.registered_cameras_label)
       registered_cameras_layout.addWidget(self.table)
@@ -122,39 +126,6 @@ class CameraPage(QWidget):
       add_camera_tab.setLayout(add_camera_layout)
       
       return add_camera_tab
-   
-   def delete_camera_tab(self):
-      INPUT_WIDTH = 250
-      delete_camera_tab = QWidget()
-      delete_camera_layout = QVBoxLayout()
-      
-      self.delete_camera_label = QLabel('Please choose the camera you want to delete.')
-      self.delete_camera_label.setObjectName("delete_camera_label")
-      self.delete_camera_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-      
-      delete_camera_form_layout = QFormLayout()
-      delete_camera_form_layout.setSpacing(60)
-      
-      self.choose_delete_camera_label = QLabel('Choose Camera')
-      self.choose_delete_camera_label.setObjectName("choose_delete_camera_label")
-      self.choose_delete_camera_input = QComboBox()
-      self.choose_delete_camera_input.setFixedWidth(INPUT_WIDTH)
-      self.choose_delete_camera_input.setPlaceholderText('Choose camera')
-      self.update_camera_combobox()
-      
-      delete_camera_form_layout.addRow(self.choose_delete_camera_label, self.choose_delete_camera_input)
-      
-      self.delete_camera_button = QPushButton('Delete Camera')
-      self.delete_camera_button.setObjectName("delete_camera_button")
-      self.delete_camera_button.clicked.connect(self.handle_delete_camera)
-      
-      delete_camera_layout.addWidget(self.delete_camera_label)
-      delete_camera_layout.addLayout(delete_camera_form_layout)
-      delete_camera_layout.addWidget(self.delete_camera_button, alignment=Qt.AlignCenter)
-      
-      delete_camera_tab.setLayout(delete_camera_layout)
-      
-      return delete_camera_tab
    
    def process_camera_footage_tab(self):
       INPUT_WIDTH = 250
@@ -254,10 +225,8 @@ class CameraPage(QWidget):
       
       # Reload the page
       self.update_camera_table()
-      self.update_camera_combobox()
       
-   def handle_delete_camera(self):
-      deleted_camera_name = self.choose_delete_camera_input.currentText()
+   def handle_delete_camera(self, deleted_camera_name):
       error = utils.remove_camera(deleted_camera_name)
       
       if len(error) > 0:
@@ -268,7 +237,6 @@ class CameraPage(QWidget):
          error_message.exec_()
          return
       
-      self.update_camera_combobox()
       self.update_camera_table()
       
       success_message = QMessageBox()
@@ -297,23 +265,21 @@ class CameraPage(QWidget):
          cameras_dict.append({"name": camera[0], "ip_address": camera[1], "store": camera[2]})
       
       self.table.setRowCount(len(cameras_dict))
-      self.table.setHorizontalHeaderLabels(["Camera Name", "IP Address", "Store", "Action"])
+      self.table.setHorizontalHeaderLabels(["Camera Name", "IP Address", "Store", "Footage", "Delete"])
       
       for index in range(len(cameras_dict)):
          camera = cameras_dict[index]
          self.table.setItem(index, 0, QTableWidgetItem(camera["name"]))
          self.table.setItem(index, 1, QTableWidgetItem(camera["ip_address"]))
          self.table.setItem(index, 2, QTableWidgetItem(camera["store"]))
-         btn = QPushButton('Show Live Footage')
-         btn.setStyleSheet("background-color: #E1DEDD;")
-         self.table.setCellWidget(index, 3, btn)
-         btn.clicked.connect(lambda checked, cam=camera: self.handle_show_live_footage(cam["name"]))
-     
-   def update_camera_combobox(self):
-      self.choose_delete_camera_input.clear()
-      cameras = utils.get_cameras()
-      for camera in cameras:
-         self.choose_delete_camera_input.addItem(camera[0])
+         footage_btn = QPushButton('Live Footage')
+         footage_btn.setStyleSheet("background-color: darkblue; color: white")
+         self.table.setCellWidget(index, 3, footage_btn)
+         footage_btn.clicked.connect(lambda checked, cam=camera: self.handle_show_live_footage(cam["name"]))
+         delete_btn = QPushButton('Delete')
+         delete_btn.setStyleSheet("background-color: darkred; color: white")
+         self.table.setCellWidget(index, 4, delete_btn)
+         delete_btn.clicked.connect(lambda checked, cam=camera: self.handle_delete_camera(cam["name"]))
 
    def is_empty(self, value):
       return len(value) == 0
