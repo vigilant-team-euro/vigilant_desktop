@@ -13,7 +13,7 @@ login_screen_height = 150
 class LoginScreen(QDialog):
     def __init__(self):
         super().__init__()
-
+        self.user = ""
         self.init_ui()
 
     def init_ui(self):
@@ -67,6 +67,7 @@ class LoginScreen(QDialog):
         self.google_button.setObjectName("google_button")
         google_icon = QIcon("icons/google_icon.png")  # Replace with the path to your Google icon
         self.google_button.setIcon(google_icon)
+        self.google_button.clicked.connect(self.handle_google_login)
         #self.google_button.setIconSize(google_icon.actualSize(self.google_button.size()))
 
         login_layout.addWidget(self.vigilant_label)
@@ -100,9 +101,19 @@ class LoginScreen(QDialog):
     def handle_login(self):
         email = self.email_input.text().strip()
         password = self.password_input.text().strip()
-
+        user = utils.auth_user(email, password)
         # Add your authentication logic here
-        if utils.auth_user(email, password):
+        if user != "":
+            self.user = user
             self.accept()
         else:
             QMessageBox.warning(self, 'Login Failed', 'Invalid email or password')
+
+    def handle_google_login(self):
+        if utils.auth_user_google():
+            self.accept
+        else:
+            QMessageBox.warning(self, 'Login Failed', 'Invalid email or password')
+
+    def getUser(self):
+        return self.user

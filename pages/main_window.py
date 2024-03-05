@@ -5,6 +5,7 @@ from pages.camera_page import CameraPage
 from pages.employee_page import EmployeePage
 from pages.video_page import VideoPage
 from pages.main_page import MainPage
+import utils
 
 
 class MainWindow(QMainWindow):
@@ -22,8 +23,8 @@ class MainWindow(QMainWindow):
 
       logout_action = QAction('Logout', self)
 
-      # if utils.is_user_logged_out():
-      #     logout_action.triggered.connect(self.close)
+      if utils.is_user_logged_out():
+          logout_action.triggered.connect(self.close)
       file_menu.addAction(logout_action)
 
       self.center_on_screen()
@@ -77,5 +78,6 @@ class MainWindow(QMainWindow):
       login_screen = LoginScreen()
       if login_screen.exec_() == QDialog.Accepted:
          self.show()
+
    def switch_page(self, page):
       self.stacked_widget.setCurrentWidget(page)

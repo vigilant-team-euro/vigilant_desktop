@@ -1,5 +1,14 @@
+from firebase import authWithMail
+
 #auth from firebase, return True if success
 def auth_user(username, password):
+    user = authWithMail(username, password)
+    if "@" in user:
+        return user
+    else:
+        return ""
+        
+def auth_user_google():
     return True
 
 #logout from firebase, return True if success
