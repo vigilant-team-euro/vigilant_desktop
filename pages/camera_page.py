@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QDateTime, QModelIndex
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtCore import Qt, QDateTime
+import utils
+import ipaddress
 
 class CameraPage(QWidget):
     
@@ -17,14 +18,13 @@ class CameraPage(QWidget):
       self.camera_label.setAlignment(Qt.AlignHCenter)
       self.camera_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
    
-      tabs = QTabWidget()
-      tabs.addTab(self.available_cameras_tab(), "Available Cameras")
-      tabs.addTab(self.add_camera_tab(), "Add Camera")
-      tabs.addTab(self.delete_camera_tab(), "Delete Camera")
-      tabs.addTab(self.process_camera_footage_tab(), "Process Camera Footage")
+      self.tabs = QTabWidget()
       
+      self.tabs.addTab(self.available_cameras_tab(), "Available Cameras")
+      self.tabs.addTab(self.add_camera_tab(), "Add Camera")
+      self.tabs.addTab(self.process_camera_footage_tab(), "Process Camera Footage")
       camera_layout.addWidget(self.camera_label)
-      camera_layout.addWidget(tabs, alignment=Qt.AlignHCenter)
+      camera_layout.addWidget(self.tabs, alignment=Qt.AlignHCenter)
       
       self.setLayout(camera_layout)
       
@@ -33,40 +33,6 @@ class CameraPage(QWidget):
    
    def available_cameras_tab(self):
       
-      # class ButtonDelegate(QWidget):
-      #    def __init__(self, parent=None):
-      #       super().__init__(parent)
-      #       self.button = QPushButton('Click Me', self)
-      #       layout = QHBoxLayout(self)
-      #       layout.addWidget(self.button)
-      #       layout.setAlignment(Qt.AlignCenter)
-      #       layout.setContentsMargins(0, 0, 0, 0)
-      #       self.setLayout(layout)
-
-      # class ButtonDelegateModel(QStandardItemModel):
-      #    def __init__(self, parent=None):
-      #       super().__init__(parent)
-
-      #    def rowCount(self, parent=QModelIndex()):
-      #       return super().rowCount(parent)
-
-      #    def columnCount(self, parent=QModelIndex()):
-      #       return super().columnCount(parent) + 1
-
-      #    def data(self, index, role=Qt.DisplayRole):
-      #       if role == Qt.DisplayRole and index.column() == self.columnCount() - 1:
-      #             return ''
-      #       return super().data(index, role)
-
-      #    def flags(self, index):
-      #       if index.column() == self.columnCount() - 1:
-      #             return Qt.ItemIsEnabled
-      #       return super().flags(index)
-
-      #    def setData(self, index, value, role=Qt.EditRole):
-      #       return False
-      
-      
       registered_cameras_tab = QWidget()
       registered_cameras_layout = QVBoxLayout()
       
@@ -74,33 +40,18 @@ class CameraPage(QWidget):
       self.registered_cameras_label.setObjectName("registered_cameras_label")
       self.registered_cameras_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
       
-      table_view = QTableView()
+      self.table = QTableWidget()
+      self.table.setColumnCount(5)
       
-      model = QStandardItemModel()
-      table_view.setModel(model)
+      self.update_camera_table()
       
-      cameras = [
-            {"name": "Camera 1", "ip_address": "192.168.1.101", "store": "Store A"},
-            {"name": "Camera 2", "ip_address": "192.168.1.102", "store": "Store B"},
-            {"name": "Camera 3", "ip_address": "192.168.1.103", "store": "Store C"}
-        ]
-      
-      model.setHorizontalHeaderLabels(["Name", "IP Address", "Store", "Button"])
-      
-      for row, camera in enumerate(cameras):
-         name_item = QStandardItem(camera["name"])
-         ip_address_item = QStandardItem(camera["ip_address"])
-         store_item = QStandardItem(camera["store"])
-         button_item = QStandardItem('')
-         # button_item.setData(ButtonDelegate(), Qt.DisplayRole)
-
-         model.setItem(row, 0, name_item)
-         model.setItem(row, 1, ip_address_item)
-         model.setItem(row, 2, store_item)
-         # model.setItem(row, 3, button_item)
+      header = self.table.horizontalHeader()
+      header.setDefaultSectionSize(self.tabs.size().width() // 5)  # Adjust column thickness
+      header = self.table.verticalHeader()
+      header.setDefaultSectionSize(50)   # Adjust row thickness
 
       registered_cameras_layout.addWidget(self.registered_cameras_label)
-      registered_cameras_layout.addWidget(table_view)
+      registered_cameras_layout.addWidget(self.table)
 
       registered_cameras_tab.setLayout(registered_cameras_layout)
       
@@ -165,6 +116,7 @@ class CameraPage(QWidget):
       
       self.add_camera_button = QPushButton('Add Camera')
       self.add_camera_button.setObjectName("add_camera_button")
+      self.add_camera_button.clicked.connect(self.handle_add_camera)
       #self.setFixedWidth(600)
       
       add_camera_layout.addWidget(self.add_camera_label)
@@ -174,37 +126,6 @@ class CameraPage(QWidget):
       add_camera_tab.setLayout(add_camera_layout)
       
       return add_camera_tab
-   
-   def delete_camera_tab(self):
-      INPUT_WIDTH = 250
-      delete_camera_tab = QWidget()
-      delete_camera_layout = QVBoxLayout()
-      
-      self.delete_camera_label = QLabel('Please choose the camera you want to delete.')
-      self.delete_camera_label.setObjectName("delete_camera_label")
-      self.delete_camera_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-      
-      delete_camera_form_layout = QFormLayout()
-      delete_camera_form_layout.setSpacing(60)
-      
-      self.choose_delete_camera_label = QLabel('Choose Camera')
-      self.choose_delete_camera_label.setObjectName("choose_delete_camera_label")
-      self.choose_delete_camera_input = QComboBox()
-      self.choose_delete_camera_input.setFixedWidth(INPUT_WIDTH)
-      self.choose_delete_camera_input.setPlaceholderText('Choose camera')
-      
-      delete_camera_form_layout.addRow(self.choose_delete_camera_label, self.choose_delete_camera_input)
-      
-      self.delete_camera_button = QPushButton('Delete Camera')
-      self.delete_camera_button.setObjectName("delete_camera_button")
-      
-      delete_camera_layout.addWidget(self.delete_camera_label)
-      delete_camera_layout.addLayout(delete_camera_form_layout)
-      delete_camera_layout.addWidget(self.delete_camera_button, alignment=Qt.AlignCenter)
-      
-      delete_camera_tab.setLayout(delete_camera_layout)
-      
-      return delete_camera_tab
    
    def process_camera_footage_tab(self):
       INPUT_WIDTH = 250
@@ -251,3 +172,128 @@ class CameraPage(QWidget):
       process_camera_footage_tab.setLayout(process_camera_footage_layout)
       
       return process_camera_footage_tab
+   
+   # UI Functionality
+   def handle_add_camera(self):
+      error_message = QMessageBox()
+      error_message.setIcon(QMessageBox.Critical)
+      error_message.setWindowTitle("Error")
+      
+      camera_name = self.camera_name_input.text().strip()
+      camera_ip = self.camera_ip_input.text().strip()
+      camera_port = self.camera_port_input.text().strip()
+      camera_username = self.camera_username_input.text().strip()
+      camera_password = self.camera_password_input.text().strip()
+      store_name = "store_name" # CHANGE THIS WHEN THE FIREBASE INTEGRATION IS DONE
+      
+      if self.is_empty(camera_name) or self.is_empty(camera_ip) or self.is_empty(camera_port) or self.is_empty(camera_username) or self.is_empty(camera_password):
+         error_message.setText("Please fill in all the fields")
+         error_message.exec_()
+         return
+      
+      if not self.validate_ip_address(camera_ip):
+         error_message.setText("Please enter a valid IP address!")
+         error_message.exec_()
+         self.camera_ip_input.clear()
+         return
+      
+      if not self.validate_port_number(camera_port):
+         error_message.setText("Please enter a valid port number!")
+         error_message.exec_()
+         self.camera_port_input.clear()
+         return
+      
+      camera_port = int(camera_port)
+      
+      # DB Operation
+      db_error = utils.add_camera(camera_name, camera_ip, camera_port, camera_username, camera_password, store_name)
+      
+      if len(db_error) > 0:
+         error_message.setText(db_error)
+         error_message.exec_()
+         self.camera_name_input.clear()
+         self.camera_username_input.clear()
+         self.camera_password_input.clear()
+         #self.store_name_combobox.setCurrentIndex(0)
+         return
+
+      success_message = QMessageBox()
+      success_message.setIcon(QMessageBox.Information)
+      success_message.setWindowTitle("Success")
+      success_message.setText("Camera added successfully!")
+      success_message.exec_()
+      
+      # Reload the page
+      self.update_camera_table()
+      
+   def handle_delete_camera(self, deleted_camera_name):
+      error = utils.remove_camera(deleted_camera_name)
+      
+      if len(error) > 0:
+         error_message = QMessageBox()
+         error_message.setIcon(QMessageBox.Critical)
+         error_message.setWindowTitle("Error")
+         error_message.setText("Failed to delete camera")
+         error_message.exec_()
+         return
+      
+      self.update_camera_table()
+      
+      success_message = QMessageBox()
+      success_message.setIcon(QMessageBox.Information)
+      success_message.setWindowTitle("Success")
+      success_message.setText("Camera added successfully!")
+      success_message.exec_()
+      
+   def handle_show_live_footage(self, camera_name):
+      error = utils.show_live_footage(camera_name)
+      
+      if (len(error) > 0):
+         error_message = QMessageBox()
+         error_message.setIcon(QMessageBox.Critical)
+         error_message.setWindowTitle("Error")
+         error_message.setText(error)
+         error_message.exec_()
+         return
+      
+   # HELPER FUNCTIONS
+   def update_camera_table(self):
+      cameras = utils.get_cameras()
+      cameras_dict = []
+      
+      for camera in cameras:
+         cameras_dict.append({"name": camera[0], "ip_address": camera[1], "store": camera[2]})
+      
+      self.table.setRowCount(len(cameras_dict))
+      self.table.setHorizontalHeaderLabels(["Camera Name", "IP Address", "Store", "Footage", "Delete"])
+      
+      for index in range(len(cameras_dict)):
+         camera = cameras_dict[index]
+         self.table.setItem(index, 0, QTableWidgetItem(camera["name"]))
+         self.table.setItem(index, 1, QTableWidgetItem(camera["ip_address"]))
+         self.table.setItem(index, 2, QTableWidgetItem(camera["store"]))
+         footage_btn = QPushButton('Live Footage')
+         footage_btn.setStyleSheet("background-color: darkblue; color: white")
+         self.table.setCellWidget(index, 3, footage_btn)
+         footage_btn.clicked.connect(lambda checked, cam=camera: self.handle_show_live_footage(cam["name"]))
+         delete_btn = QPushButton('Delete')
+         delete_btn.setStyleSheet("background-color: darkred; color: white")
+         self.table.setCellWidget(index, 4, delete_btn)
+         delete_btn.clicked.connect(lambda checked, cam=camera: self.handle_delete_camera(cam["name"]))
+
+   def is_empty(self, value):
+      return len(value) == 0
+   
+   def validate_port_number(self, port_number):
+      try:
+         port = int(port_number)
+         return port > 0 and port < 65536
+      except ValueError:
+         return False
+      
+   def validate_ip_address(self, ip_address):
+      try:
+         ipaddress.ip_address(ip_address)
+         return True
+      except ValueError:
+         return False
