@@ -1,6 +1,8 @@
+
 import os
 import sqlite3
 import cv2
+from firebase import authWithMail
 
 CAMERA_INFO_FOLDER = "camera_info_data"
 CAMERA_INFO_DB_FILE = "camera_information.db"
@@ -9,6 +11,13 @@ os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "timeout;1000"
 
 #auth from firebase, return True if success
 def auth_user(username, password):
+    user = authWithMail(username, password)
+    if "@" in user:
+        return user
+    else:
+        return ""
+        
+def auth_user_google():
     return True
 
 #logout from firebase, return True if success
