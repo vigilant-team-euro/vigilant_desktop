@@ -1,0 +1,91 @@
+QLabel#camera_label{
+   font-size: 30px;
+   font-style: italic;
+   font-family: 'Arial', 'Cochin', Georgia, Times, 'Times New Roman';
+   margin-bottom: 20px;
+   background: transparent;
+   border: none;
+   color: white;
+}
+
+QLabel#registered_cameras_label, QLabel#add_camera_label, QLabel#process_description_label, QLabel#delete_camera_label {
+   font-size: 22px;
+   font-family: 'Arial', 'Cochin', Georgia, Times, 'Times New Roman';
+   margin-top: 20px;
+   margin-bottom: 80px;
+   border: none;
+}
+
+QLabel#add_camera_label, QLabel#delete_camera_label, QLabel#process_description_label, QLabel#process_description_label{
+   border: none;
+}
+
+QLabel#choose_delete_camera_label, QLabel#choose_store_label, QLabel#choose_camera_label, QLabel#set_datetime_label {
+   border: none;
+}
+
+QLabel#camera_name_label,  QLabel#camera_ip_label, QLabel#camera_port_label, QLabel#camera_username_label, QLabel#camera_password_label, QLabel#store_name_label{
+   font-size: 20px;
+   border: none;
+}
+
+QPushButton#add_camera_button, QPushButton#start_process_button, QPushButton#delete_camera_button {
+   padding: 10px 30px;
+}
+
+QWidget {
+   background-color: #fdfdfd;
+   border: 1px solid #ccc;
+}
+
+QLineEdit {
+   font-size: 18px;
+   padding: 5px;
+   margin: 5px;
+   border: 1px solid #ccc;
+   border-radius: 5px;
+   background-color: white;
+}
+
+QComboBox {
+   background-color: white;
+   padding: 5px;
+   margin: 5px;
+   border: 1px solid #ccc;
+   border-radius: 5px;
+}
+
+QPushButton#add_camera_button, QPushButton#start_process_button{
+   font-size: 18px;
+   padding-inline: 20px;
+   margin: 5px;
+   background-color: #4CAF50;
+   color: white;
+   border-radius: 10px;
+}
+
+QPushButton#add_camera_button:hover, QPushButton#start_process_button:hover {
+   background-color: #45a049;
+}
+
+QPushButton#delete_camera_button{
+   font-size: 18px;
+   padding-inline: 20px;
+   margin-bottom: 100px;
+   background-color: #f44336;
+   color: white;
+   border-radius: 10px;
+}
+
+QPushButton#delete_camera_button:hover {
+   background-color: #da190b;
+}
+
+QDateTimeEdit {
+   font-size: 18px;
+   padding: 5px;
+   margin: 5px;
+   border: 1px solid #ccc;
+   border-radius: 5px;
+   background-color: white;
+}

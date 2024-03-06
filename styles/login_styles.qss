@@ -1,0 +1,79 @@
+/* Example style */
+QDialog {
+    background-color: #2a3447;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+
+QLabel {
+    font-size: 18px;
+    font-family: 'Arial';
+    color: white;
+}
+
+QLabel#vigilant_label {
+    font-size: 40px;
+    font-weight: bold;
+    font-family: 'Cambria', 'Cochin', Georgia, Times, 'Times New Roman';
+    margin: 20px;
+}
+
+QLabel#description_label {
+    font-size: 20px;
+    font: italic;
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+QLineEdit {
+    font-size: 20px;
+    padding: 5px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    max-width: 300px;
+}
+
+QPushButton#login_button {
+    font-size: 20px;
+    padding: 8px;
+    margin: 5px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 10px;
+}
+
+QPushButton#google_button {
+    font-size: 20px;
+    padding: 8px;
+    margin: 5px;
+    background-color: lightgrey;
+    color: black;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    padding-left: 20px;
+}
+
+QPushButton#login_button:hover {
+    background-color: #45a049;
+}
+
+QPushButton#google_button:hover {
+    background-color: #cacaca;
+}
+
+
+/* CameraPage styling */
+#CameraPage {
+    background-color: #f110f0;
+}
+
+/* EmployeePage styling */
+#EmployeePage {
+    background-color: #e0e0e0;
+}
+
+/* StorePage styling */
+#StorePage {
+    background-color: #d0d0d0;
+}

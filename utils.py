@@ -1,17 +1,15 @@
-from firebase_admin import auth
-
-FIREBASE_CONFIG_FILE = 'firebaseConfig.json'
+from firebase import authWithMail
 
 #auth from firebase, return True if success
 def auth_user(username, password):
-    try:
-        user = auth.get_user_by_email(username)
-    except auth.UserNotFoundError:
-        return False
-    except Exception as e:
-        return False
-    finally:
-        return True
+    user = authWithMail(username, password)
+    if "@" in user:
+        return user
+    else:
+        return ""
+        
+def auth_user_google():
+    return True
 
 #logout from firebase, return True if success
 def is_user_logged_out():
