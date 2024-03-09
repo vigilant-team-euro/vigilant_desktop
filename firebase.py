@@ -1,6 +1,5 @@
 import pyrebase
 
-
 firebaseConfig = {
   "apiKey": "AIzaSyBxDTNJ-jV6_ln3tSCyASYYacMcESgZtRk",
   "authDomain": "vigilant-36758.firebaseapp.com",
@@ -24,6 +23,7 @@ def authWithMail(email, password):
 
 def authWithGoogle():
     return True
-    
+
+
 
 

@@ -1,9 +1,13 @@
 {
-   "apiKey": "AIzaSyBxDTNJ-jV6_ln3tSCyASYYacMcESgZtRk",
-   "authDomain": "vigilant-36758.firebaseapp.com",
-   "projectId": "vigilant-36758",
-   "storageBucket": "vigilant-36758.appspot.com",
-   "messagingSenderId": "14332637896",
-   "appId": "1:14332637896:web:7e53a790a003cb2204abfd",
-   "measurementId": "G-K0GKXG9BX9"
- }
+  "type": "service_account",
+  "project_id": "vigilant-36758",
+  "private_key_id": "e23c2148b8092a731ab66ee2615c2c3e7246af8c",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDTB0KYEL7YHrZG\nZyGKC4mZTcHmDmDXoCR380D5bL+ADk3KclUeQOyF7vNEyxAYtQKxJCKrg/UV5vOl\nH2d/0uaqOQrDS74zlHIvUfNKvN5qzHe73hPTRHTVw4thgBjsScU6mWhCFCzlvfBs\nGj5pu3hm4jFfnpWkVMKu3QdI/wRU5jgQ9lxf0wNKhIMhLXOD4KCu/XT0J0PGeHR4\nN+pyEdw5GeDMcVtq4zoZKde+LRT9yIX7yck7/BvxWU4UBVCnGRQxd+QWbmys1ZFR\n/XPPhHCmcm2dwT1ovwtZyWbsQ4inInJ36jrohzVPum1rO5S8E0bR1m5Pql2YsUEl\nBxMDHrS5AgMBAAECggEABYkANyrhRpvvngMgfxV0Y4AFoPopkh5SNo872g7/KuW1\nJqU/FE8RpSWyXdCRuIQu8OSIwETyzcNECsW7GkA26qoaXSsEbyfqotEcd45iqxx3\n24aksHrwMZcydbk9bh01Pic989XBo7kKsFsz3eQb8V7neqGXPTs37AxCH6kIvQ1M\noa0Fd2LFIhDwgLrvuIk+qw7maC+uJF5EPKMNhJQ/PdlW996fIGjt65nIilCk7T+m\ntXaArcKCjR5ectzP5e7FGzgtHRi45f5A7XSoPcBBEtWfk6BVHQ4A/TY7SXuHFNmH\nqgYIeB0IQ7fTZ10uhbb2rxnbBmR8Sx8RcpdIoNil8QKBgQDxApVpMsfFwKoJ7CcW\nEPVFMzoKnTIV/EKMkVFZU9aDuHWlk3vbgs0hpdpM5CHbu8qPU/DLwigZMZG73jYP\n+2M5qJ3Bt/w/w5qYJCC1PwVwtIC7aerlFJi0nC/woDyaLXnYqW08syffAE6uNX7R\n4RPuqzyt3qEUN1ciOaYxSpGqtQKBgQDgJ0z5EoARez+CCvaDDmaixde/qQByvACA\nQ+9Uj5kLpL5R+gZ6PifqzQHIfdUg2ajJEWcw9uVjdLve3xjbSqlWlvUwU793tpLZ\npo1pxBlPmyqsNVcNzySxs3CVKrIcI31WHN4ElyQCWrnDzFxspN2g0OOZYvYfSxvJ\nMKsDW7rwdQKBgDzlKTlGYmGd95jAOXQC3uYYNm8eHtydO3dm9EX8v/PSNK+cXyws\nlYYN8OWCsudhQKIMVIg3S4hqFOeCEujg3MZhy1J6GVtHIhWU80q4XLiIcwpnjblK\nBfeEizxiUE2odeP/kyFGJynaWwb7b0q6cx3X2GIaIVsJTJPSOyKzM7ENAoGBALyG\nUWbq+Gu7jR6CufJgGlKss1ive4EEPiei+5fTbpUsaiXoc6o8vLXu1qEZtDd82UjD\nKlc0UJnlhF1epjlKAkKhlHag+VhmZfxI6IccN22Mw8cy1ZT3s5UBpp7O2h5weuoC\nPXj+5XpVdAgJyXJW91BaYBKR+Q84zJXaKPsaG5BBAoGBAMOPIOnA3vE9I+Tgcq1D\nXPcOl+dL/UNQX6pFslI0Vwwbpo44JkQ7jV5igC2IMqD1lLDzbDFfArsHOvrmyAf+\nZx0kBgsio3DV/xWZjmZHnzHQ7Wpcs6PCqEVi8I7YnfFj+fmUS4+cNp4BAyD7hWBv\nc0ILVzycJYfdrkU7HPmiPmnQ\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-dj0te@vigilant-36758.iam.gserviceaccount.com",
+  "client_id": "112853271906891017154",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-dj0te%40vigilant-36758.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
