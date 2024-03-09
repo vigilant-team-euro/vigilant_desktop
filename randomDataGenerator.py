@@ -4,16 +4,18 @@ import datetime
 from datetime import timedelta
 import random
 
+cred = credentials.Certificate("./firebaseConfig.json")
+app = firebase_admin.initialize_app(cred, {'storageBucket': 'vigilant-36758.appspot.com'})
+all_db = firestore.client()
 
-def pushRandomData():
-    cred = credentials.Certificate("./firebaseConfig.json")
-    app = firebase_admin.initialize_app(cred, {'storageBucket': 'vigilant-36758.appspot.com'})
-    all_db = firestore.client()
-
-    start_date = datetime.datetime(2024, 3, 7, 0, 0)
-    end_date = start_date + timedelta(minutes=3)
+def pushRandomData(username:str, storename:str, day:int, month:int, year:int, interval:int):
+    
+    start_date = datetime.datetime(year, month, day, 0, 0)
+    end_date = start_date + timedelta(minutes=interval)
     frame_id = 1
-
+    
+    frames_arr = []
+    
     while end_date.time() != datetime.time(0, 0):
         print(start_date, end_date)
         female_count = random.randint(0,50)
@@ -29,28 +31,30 @@ def pushRandomData():
         "male_count":male_count,
         "neutral_count":random.randint(0,10),
         "sad_count": random.randint(0,10),
-        "surprise_count":random.randint(0,10)
+        "surprise_count":random.randint(0,10),
+        "start_date": start_date,
+        "end_date": end_date
         }
-
-        data = {
-            "start_date": start_date,
-            "end_date": end_date,
-            "count": arr["female_count"] + arr["male_count"],
-            "storeName": "store1",
-            "frames": arr
-        }
-
-        arr = all_db.collection("users").document("random_user").collection("stores").document("store1").collection("data").document(start_date.strftime("%d.%m.%Y") + "_" + str(frame_id)).set(data)
-
         
+        frames_arr.append(arr)
 
         if(end_date.time() == datetime.time(0, 0)):
             break
 
-        start_date += timedelta(minutes=3)
-        end_date += timedelta(minutes=3)
+        start_date += timedelta(minutes=interval)
+        end_date += timedelta(minutes=interval)
         frame_id += 1
+        
+    data = {
+            "storeName": "store1",
+            "frames": frames_arr
+        }
+
+    arr = all_db.collection("users").document(username).collection("stores").document(storename).collection("data").document(f"{day}_{month}_{year}").set(data)
 
 
 if __name__ == '__main__':
-    pushRandomData()
+    pushRandomData("random_user2", "store1", 8, 3, 2024, 3)
+    pushRandomData("random_user2", "store1", 9, 3, 2024, 5)
+    pushRandomData("random_user2", "store1", 10, 3, 2024, 10)
+    pushRandomData("random_user2", "store1", 11, 3, 2024, 15)
