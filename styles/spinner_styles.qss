@@ -1,0 +1,21 @@
+QDialog {
+   background-color: #f0f0f0;
+}
+
+QLabel {
+   font-size: 16px;
+   color: #333333;
+}
+
+QProgressBar {
+   border: 2px solid #2a3447;
+   border-radius: 5px;
+   background-color: #E0E0E0;
+   max-height: 10px; /* Adjust this value to control the thickness */
+   margin: 20px 0; /* Add some space around the progress bar */
+}
+
+QProgressBar::chunk {
+   background-color: #2a3447;
+   border-radius: 4px;
+}
