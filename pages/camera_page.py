@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QDateTime
+from PyQt5.QtCore import Qt, QDateTime, QThread, pyqtSignal
 import utils
 import ipaddress
+from components.spinner import SpinnerDialog
 
 class CameraPage(QWidget):
     
@@ -246,15 +247,30 @@ class CameraPage(QWidget):
       success_message.exec_()
       
    def handle_show_live_footage(self, camera_name):
-      error = utils.show_live_footage(camera_name)
       
-      if (len(error) > 0):
+      self.thread = self.LiveFootageThread(camera_name)
+      self.thread.finished.connect(self.on_live_footage_finished)
+      
+      self.spinner_dialog = SpinnerDialog(f"Connecting to {camera_name}...")
+      self.spinner_dialog.show()
+    
+      self.thread.start()
+      
+   def on_live_footage_finished(self, error):
+      self.spinner_dialog.accept()
+      self.spinner_dialog = None
+      
+      # Check if there was an error
+      if len(error) > 0:
          error_message = QMessageBox()
          error_message.setIcon(QMessageBox.Critical)
          error_message.setWindowTitle("Error")
          error_message.setText(error)
          error_message.exec_()
-         return
+      
+      # Clean up the thread
+      self.thread.deleteLater()
+      self.thread = None
       
    # HELPER FUNCTIONS
    def update_camera_table(self):
@@ -297,3 +313,16 @@ class CameraPage(QWidget):
          return True
       except ValueError:
          return False
+      
+   # Threads
+   class LiveFootageThread(QThread):
+      
+      finished = pyqtSignal(str)
+
+      def __init__(self, camera_name):
+         super().__init__()
+         self.camera_name = camera_name
+
+      def run(self):
+         error = utils.show_live_footage(self.camera_name)
+         self.finished.emit(error)
