@@ -2,9 +2,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QDateTime
 
 class VideoPage(QWidget):
-    def __init__(self):
+    def __init__(self,user):
         super().__init__()
-
+        self.user = user
         self.init_ui()
 
     def init_ui(self):

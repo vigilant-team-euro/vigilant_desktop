@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import *
 
 class MainPage(QWidget):
-    def __init__(self):
+    def __init__(self, user):
         super().__init__()
-
+        self.user = user
         self.init_ui()
 
     def init_ui(self):

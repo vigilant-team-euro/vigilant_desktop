@@ -6,9 +6,9 @@ from pages.main_page import MainPage
 import utils
 
 class MainWindow(QMainWindow):
-   def __init__(self):
+   def __init__(self, user):
       super().__init__()
-
+      self.user = user
       self.init_ui()
 
    def init_ui(self):
@@ -21,9 +21,9 @@ class MainWindow(QMainWindow):
       # Add other menu items and functionalities as needed
       self.stacked_widget = QStackedWidget(self)
       self.setCentralWidget(self.stacked_widget)
-      self.main_page = MainPage()
-      self.camera_page = CameraPage()
-      self.video_page = VideoPage()
+      self.main_page = MainPage(user=self.user)
+      self.camera_page = CameraPage(user=self.user)
+      self.video_page = VideoPage(user=self.user)
 
       self.stacked_widget.addWidget(self.main_page)
       self.stacked_widget.addWidget(self.camera_page)

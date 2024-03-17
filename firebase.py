@@ -1,4 +1,8 @@
 import pyrebase
+import firebase_admin
+from firebase_admin import credentials, firestore
+import datetime
+from datetime import timedelta
 
 firebaseConfig = {
   "apiKey": "AIzaSyBxDTNJ-jV6_ln3tSCyASYYacMcESgZtRk",
@@ -23,6 +27,21 @@ def authWithMail(email, password):
 
 def authWithGoogle():
     return True
+
+# FIRESTORE
+cred = credentials.Certificate("./firebaseConfig.json")
+app = firebase_admin.initialize_app(cred, {'storageBucket': 'vigilant-36758.appspot.com'})
+all_db = firestore.client()
+
+def getStoreNames(username):
+    store_names = []
+    arr = all_db.collection("users").document(username).collection("stores").stream()
+
+    for a in arr:
+        store_names.append(a.to_dict()["store_name"])
+    
+    return store_names
+
 
 
 

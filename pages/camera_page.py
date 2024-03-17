@@ -3,14 +3,16 @@ from PyQt5.QtCore import Qt, QDateTime, QThread, pyqtSignal
 import utils
 import ipaddress
 from components.spinner import SpinnerDialog
+from firebase import getStoreNames
 
 TABLE_HORIZONTAL_HEADERS = ["Camera Name", "IP Address", "Store", "Footage", "Delete"]
 
 class CameraPage(QWidget):
     
-   def __init__(self):
+   def __init__(self, user):
       super().__init__()
       self.ip_addresses = []
+      self.user = user
       self.initUI()
 
    def initUI(self):
@@ -110,6 +112,7 @@ class CameraPage(QWidget):
       self.store_name_label.setObjectName("store_name_label")
       self.store_name_combobox.setFixedWidth(INPUT_WIDTH)
       self.store_name_combobox.setPlaceholderText('Choose store name')
+      self.store_name_combobox.addItems(getStoreNames(self.user))
       
       add_camera_form_layout.addRow(self.camera_name_label, self.camera_name_input)
       add_camera_form_layout.addRow(self.camera_ip_label, self.camera_ip_input)
