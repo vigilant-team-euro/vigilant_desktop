@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QDateTime
 import firebase
+import deep_face
 
 class VideoPage(QWidget):
     def __init__(self,user):
@@ -56,6 +57,7 @@ class VideoPage(QWidget):
         
         process_video_button = QPushButton('Process Video')
         process_video_button.setObjectName("process_video_button")
+        process_video_button.clicked.connect(self.handle_deep_face)
         
         video_layout.addWidget(self.video_label)
         video_layout.addWidget(self.video_upload_description)
@@ -75,5 +77,11 @@ class VideoPage(QWidget):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         file_name, _ = QFileDialog.getOpenFileName(self, "Upload Video", "", "Video Files (*.mp4 *.avi)", options=options)
+        
         if file_name:
             print("Uploaded video:", file_name)
+            self.upload_video_button.setText(file_name)
+            self.file_name = file_name
+
+    def handle_deep_face(self):
+        deep_face.deep_face(self.file_name, 10)
