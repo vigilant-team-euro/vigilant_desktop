@@ -76,6 +76,19 @@ def remove_camera(camera_name):
         connection.close()
         return db_error
 
+def get_store_cameras(store_name):
+    db_file = os.path.join(CAMERA_INFO_FOLDER, CAMERA_INFO_DB_FILE)
+    connection = sqlite3.connect(db_file)
+    cursor = connection.cursor()
+    cursor.execute(f"SELECT camera_name FROM cameras WHERE store_name = '{store_name}'")
+    result = cursor.fetchall()
+    connection.close()
+
+    camera_names = []
+    for camera in result:
+        camera_names.append(camera[0])
+    return camera_names
+
 #video utils
 def add_video():
     pass

@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QDateTime
+import firebase
 
 class VideoPage(QWidget):
     def __init__(self,user):
@@ -41,9 +42,17 @@ class VideoPage(QWidget):
         self.set_datetime_input = QDateTimeEdit()
         self.set_datetime_input.setFixedWidth(INPUT_WIDTH)
         self.set_datetime_input.setDateTime(QDateTime.currentDateTime())
+
+        self.choose_store_label = QLabel('Choose Store')
+        self.choose_store_label.setObjectName("choose_store_label")
+        self.choose_store_input = QComboBox()
+        self.choose_store_input.setFixedWidth(INPUT_WIDTH)
+        self.choose_store_input.setPlaceholderText('Choose store')
+        self.choose_store_input.addItems(firebase.getStoreNames(self.user))
         
         video_upload_form_layout.addRow(self.upload_video_label, self.upload_video_button)
         video_upload_form_layout.addRow(self.set_datetime_label, self.set_datetime_input)
+        video_upload_form_layout.addRow(self.choose_store_label, self.choose_store_input)
         
         process_video_button = QPushButton('Process Video')
         process_video_button.setObjectName("process_video_button")

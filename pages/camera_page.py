@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt, QDateTime, QThread, pyqtSignal
 import utils
 import ipaddress
 from components.spinner import SpinnerDialog
-from firebase import getStoreNames
+import firebase
 
 TABLE_HORIZONTAL_HEADERS = ["Camera Name", "IP Address", "Store", "Footage", "Delete"]
 
@@ -112,7 +112,7 @@ class CameraPage(QWidget):
       self.store_name_label.setObjectName("store_name_label")
       self.store_name_combobox.setFixedWidth(INPUT_WIDTH)
       self.store_name_combobox.setPlaceholderText('Choose store name')
-      self.store_name_combobox.addItems(getStoreNames(self.user))
+      self.store_name_combobox.addItems(firebase.getStoreNames(self.user))
       
       add_camera_form_layout.addRow(self.camera_name_label, self.camera_name_input)
       add_camera_form_layout.addRow(self.camera_ip_label, self.camera_ip_input)
@@ -147,17 +147,19 @@ class CameraPage(QWidget):
       process_camera_footage_form_layout = QFormLayout()
       process_camera_footage_form_layout.setSpacing(60)
       
-      self.choose_store_label = QLabel('Choose Store')
-      self.choose_store_label.setObjectName("choose_store_label")
-      self.choose_store_input = QComboBox()
-      self.choose_store_input.setFixedWidth(INPUT_WIDTH)
-      self.choose_store_input.setPlaceholderText('Choose store')
-      
       self.choose_camera_label = QLabel('Choose Camera')
       self.choose_camera_label.setObjectName("choose_camera_label")
       self.choose_camera_input = QComboBox()
       self.choose_camera_input.setFixedWidth(INPUT_WIDTH)
       self.choose_camera_input.setPlaceholderText('Choose camera')
+
+      self.choose_store_label = QLabel('Choose Store')
+      self.choose_store_label.setObjectName("choose_store_label")
+      self.choose_store_input = QComboBox()
+      self.choose_store_input.setFixedWidth(INPUT_WIDTH)
+      self.choose_store_input.setPlaceholderText('Choose store')
+      self.choose_store_input.addItems(firebase.getStoreNames(self.user))
+      self.choose_store_input.currentTextChanged.connect(self.update_camera_combobox)
       
       self.set_datetime_label = QLabel('Set Date and Time')
       self.set_datetime_label.setObjectName("set_datetime_label")
@@ -350,7 +352,13 @@ class CameraPage(QWidget):
             non_editable_item = QTableWidgetItem()
             non_editable_item.setFlags(non_editable_item.flags() & ~Qt.ItemIsEditable)
             table_widget.setItem(row_index, column_index, non_editable_item)
-      
+   
+   def update_camera_combobox(self):
+      self.choose_camera_input.clear()
+      store_name = self.choose_store_input.currentText()
+      if store_name != None:
+         self.choose_camera_input.addItems(utils.get_store_cameras(store_name))
+
    # Threads
    class LiveFootageThread(QThread):
       
