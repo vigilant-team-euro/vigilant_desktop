@@ -61,19 +61,3 @@ QPushButton#login_button:hover {
 QPushButton#google_button:hover {
     background-color: #cacaca;
 }
-
-
-/* CameraPage styling */
-#CameraPage {
-    background-color: #f110f0;
-}
-
-/* EmployeePage styling */
-#EmployeePage {
-    background-color: #e0e0e0;
-}
-
-/* StorePage styling */
-#StorePage {
-    background-color: #d0d0d0;
-}

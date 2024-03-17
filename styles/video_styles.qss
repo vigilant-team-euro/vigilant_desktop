@@ -21,7 +21,7 @@ QLabel#video_upload_description {
    margin-bottom: 80px;
 }
 
-QLabel#upload_video_label, QLabel#set_datetime_label {
+QLabel#upload_video_label, QLabel#set_datetime_label, QLabel#choose_store_label {
    font-size: 20px;
    border: none;
 }
@@ -56,3 +56,10 @@ QDateTimeEdit {
    background-color: white;
 }
 
+QComboBox {
+   background-color: white;
+   padding: 5px;
+   margin: 5px;
+   border: 1px solid #ccc;
+   border-radius: 5px;
+}

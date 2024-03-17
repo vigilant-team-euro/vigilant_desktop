@@ -1,13 +1,18 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QDateTime
+from PyQt5.QtCore import Qt, QDateTime, QThread, pyqtSignal
 import utils
 import ipaddress
+from components.spinner import SpinnerDialog
+import firebase
+
+TABLE_HORIZONTAL_HEADERS = ["Camera Name", "IP Address", "Store", "Footage", "Delete"]
 
 class CameraPage(QWidget):
     
-   def __init__(self):
+   def __init__(self, user):
       super().__init__()
-
+      self.ip_addresses = []
+      self.user = user
       self.initUI()
 
    def initUI(self):
@@ -42,6 +47,7 @@ class CameraPage(QWidget):
       
       self.table = QTableWidget()
       self.table.setColumnCount(5)
+      self.table.itemChanged.connect(self.handle_table_item_changed)
       
       self.update_camera_table()
       
@@ -106,6 +112,7 @@ class CameraPage(QWidget):
       self.store_name_label.setObjectName("store_name_label")
       self.store_name_combobox.setFixedWidth(INPUT_WIDTH)
       self.store_name_combobox.setPlaceholderText('Choose store name')
+      self.store_name_combobox.addItems(firebase.getStoreNames(self.user))
       
       add_camera_form_layout.addRow(self.camera_name_label, self.camera_name_input)
       add_camera_form_layout.addRow(self.camera_ip_label, self.camera_ip_input)
@@ -140,17 +147,19 @@ class CameraPage(QWidget):
       process_camera_footage_form_layout = QFormLayout()
       process_camera_footage_form_layout.setSpacing(60)
       
-      self.choose_store_label = QLabel('Choose Store')
-      self.choose_store_label.setObjectName("choose_store_label")
-      self.choose_store_input = QComboBox()
-      self.choose_store_input.setFixedWidth(INPUT_WIDTH)
-      self.choose_store_input.setPlaceholderText('Choose store')
-      
       self.choose_camera_label = QLabel('Choose Camera')
       self.choose_camera_label.setObjectName("choose_camera_label")
       self.choose_camera_input = QComboBox()
       self.choose_camera_input.setFixedWidth(INPUT_WIDTH)
       self.choose_camera_input.setPlaceholderText('Choose camera')
+
+      self.choose_store_label = QLabel('Choose Store')
+      self.choose_store_label.setObjectName("choose_store_label")
+      self.choose_store_input = QComboBox()
+      self.choose_store_input.setFixedWidth(INPUT_WIDTH)
+      self.choose_store_input.setPlaceholderText('Choose store')
+      self.choose_store_input.addItems(firebase.getStoreNames(self.user))
+      self.choose_store_input.currentTextChanged.connect(self.update_camera_combobox)
       
       self.set_datetime_label = QLabel('Set Date and Time')
       self.set_datetime_label.setObjectName("set_datetime_label")
@@ -246,26 +255,55 @@ class CameraPage(QWidget):
       success_message.exec_()
       
    def handle_show_live_footage(self, camera_name):
-      error = utils.show_live_footage(camera_name)
       
-      if (len(error) > 0):
+      self.thread = self.LiveFootageThread(camera_name)
+      self.thread.finished.connect(self.on_live_footage_finished)
+      
+      self.spinner_dialog = SpinnerDialog(f"Connecting to {camera_name}...")
+      self.spinner_dialog.show()
+    
+      self.thread.start()
+      
+   def on_live_footage_finished(self, error):
+      self.spinner_dialog.accept()
+      self.spinner_dialog = None
+      
+      # Check if there was an error
+      if len(error) > 0:
          error_message = QMessageBox()
          error_message.setIcon(QMessageBox.Critical)
          error_message.setWindowTitle("Error")
          error_message.setText(error)
          error_message.exec_()
-         return
       
+      # Clean up the thread
+      self.thread.deleteLater()
+      self.thread = None
+   
+   def handle_table_item_changed(self, item):
+      if item.column() == 1: # IP Address column
+         if not self.validate_ip_address(item.text()):
+            error_message = QMessageBox()
+            error_message.setIcon(QMessageBox.Critical)
+            error_message.setWindowTitle("Error")
+            error_message.setText("Please enter a valid IP address!")
+            error_message.exec_()
+            item.setText(self.ip_addresses[item.row()])
+         else:
+            camera_name = self.table.item(item.row(), 0).text()
+            utils.edit_camera_ip(camera_name, item.text())
+
    # HELPER FUNCTIONS
    def update_camera_table(self):
       cameras = utils.get_cameras()
       cameras_dict = []
+      self.ip_addresses = []
       
       for camera in cameras:
          cameras_dict.append({"name": camera[0], "ip_address": camera[1], "store": camera[2]})
       
       self.table.setRowCount(len(cameras_dict))
-      self.table.setHorizontalHeaderLabels(["Camera Name", "IP Address", "Store", "Footage", "Delete"])
+      self.table.setHorizontalHeaderLabels(TABLE_HORIZONTAL_HEADERS)
       
       for index in range(len(cameras_dict)):
          camera = cameras_dict[index]
@@ -280,6 +318,11 @@ class CameraPage(QWidget):
          delete_btn.setStyleSheet("background-color: darkred; color: white")
          self.table.setCellWidget(index, 4, delete_btn)
          delete_btn.clicked.connect(lambda checked, cam=camera: self.handle_delete_camera(cam["name"]))
+         
+         self.ip_addresses.append(camera["ip_address"])
+      
+      self.set_column_read_only(self.table, 0) # Make the camera name column read-only
+      self.set_column_read_only(self.table, 2)  # Make the store name column read-only
 
    def is_empty(self, value):
       return len(value) == 0
@@ -297,3 +340,34 @@ class CameraPage(QWidget):
          return True
       except ValueError:
          return False
+   
+   def set_column_read_only(self, table_widget, column_index):
+      for row_index in range(table_widget.rowCount()):
+         item = table_widget.item(row_index, column_index)
+         if item is not None:
+            # Remove the ItemIsEditable flag to make the item read-only
+            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+         else:
+            # If the cell is empty, create a new non-editable item
+            non_editable_item = QTableWidgetItem()
+            non_editable_item.setFlags(non_editable_item.flags() & ~Qt.ItemIsEditable)
+            table_widget.setItem(row_index, column_index, non_editable_item)
+   
+   def update_camera_combobox(self):
+      self.choose_camera_input.clear()
+      store_name = self.choose_store_input.currentText()
+      if store_name != None:
+         self.choose_camera_input.addItems(utils.get_store_cameras(store_name))
+
+   # Threads
+   class LiveFootageThread(QThread):
+      
+      finished = pyqtSignal(str)
+
+      def __init__(self, camera_name):
+         super().__init__()
+         self.camera_name = camera_name
+
+      def run(self):
+         error = utils.show_live_footage(self.camera_name)
+         self.finished.emit(error)

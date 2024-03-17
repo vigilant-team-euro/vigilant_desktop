@@ -1,10 +1,12 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QDateTime
+import firebase
+import deep_face
 
 class VideoPage(QWidget):
-    def __init__(self):
+    def __init__(self,user):
         super().__init__()
-
+        self.user = user
         self.init_ui()
 
     def init_ui(self):
@@ -41,12 +43,21 @@ class VideoPage(QWidget):
         self.set_datetime_input = QDateTimeEdit()
         self.set_datetime_input.setFixedWidth(INPUT_WIDTH)
         self.set_datetime_input.setDateTime(QDateTime.currentDateTime())
+
+        self.choose_store_label = QLabel('Choose Store')
+        self.choose_store_label.setObjectName("choose_store_label")
+        self.choose_store_input = QComboBox()
+        self.choose_store_input.setFixedWidth(INPUT_WIDTH)
+        self.choose_store_input.setPlaceholderText('Choose store')
+        self.choose_store_input.addItems(firebase.getStoreNames(self.user))
         
         video_upload_form_layout.addRow(self.upload_video_label, self.upload_video_button)
         video_upload_form_layout.addRow(self.set_datetime_label, self.set_datetime_input)
+        video_upload_form_layout.addRow(self.choose_store_label, self.choose_store_input)
         
         process_video_button = QPushButton('Process Video')
         process_video_button.setObjectName("process_video_button")
+        process_video_button.clicked.connect(self.handle_deep_face)
         
         video_layout.addWidget(self.video_label)
         video_layout.addWidget(self.video_upload_description)
@@ -66,5 +77,11 @@ class VideoPage(QWidget):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         file_name, _ = QFileDialog.getOpenFileName(self, "Upload Video", "", "Video Files (*.mp4 *.avi)", options=options)
+        
         if file_name:
             print("Uploaded video:", file_name)
+            self.upload_video_button.setText(file_name)
+            self.file_name = file_name
+
+    def handle_deep_face(self):
+        deep_face.deep_face(self.file_name, 10)

@@ -93,7 +93,7 @@ class LoginScreen(QDialog):
 
         # Calculate the center of the screen
         x = (screen_geometry.width() - self.width()) // 2
-        y = ((screen_geometry.height() - self.height()) // 5) * 2
+        y = (screen_geometry.height() - self.height()) // 2
 
         # Set the position of the main window
         self.move(x, y)
@@ -101,13 +101,27 @@ class LoginScreen(QDialog):
     def handle_login(self):
         email = self.email_input.text().strip()
         password = self.password_input.text().strip()
+        
+        if email == "" or password == "":
+            error_message = QMessageBox()
+            error_message.setIcon(QMessageBox.Warning)
+            error_message.setWindowTitle("Login Failed")
+            error_message.setText("Please enter your email and password!")
+            error_message.exec_()
+            return
+        
         user = utils.auth_user(email, password)
         # Add your authentication logic here
         if user != "":
             self.user = user
             self.accept()
         else:
-            QMessageBox.warning(self, 'Login Failed', 'Invalid email or password')
+            error_message = QMessageBox()
+            error_message.setIcon(QMessageBox.Critical)
+            error_message.setWindowTitle("Login Failed")
+            error_message.setText("Invalid email or password")
+            error_message.exec_()
+            return
 
     def handle_google_login(self):
         if utils.auth_user_google():

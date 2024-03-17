@@ -1,4 +1,3 @@
-
 import os
 import sqlite3
 import cv2
@@ -49,8 +48,19 @@ def add_camera(camera_name, camera_ip, camera_port, camera_username, camera_pass
         connection.close()
         return primary_key_error
 
-def edit_camera():
-    pass
+def edit_camera_ip(camera_name, new_ip):
+    db_file = os.path.join(CAMERA_INFO_FOLDER, CAMERA_INFO_DB_FILE)
+    connection = sqlite3.connect(db_file)
+    cursor = connection.cursor()
+    db_error = ""
+    try:
+        cursor.execute(f"UPDATE cameras SET ip_address = '{new_ip}' WHERE camera_name = '{camera_name}'")
+        connection.commit()
+    except sqlite3.Error as e:
+        db_error = e
+    finally:
+        connection.close()
+        return db_error
 
 def remove_camera(camera_name):
     db_file = os.path.join(CAMERA_INFO_FOLDER, CAMERA_INFO_DB_FILE)
@@ -65,6 +75,19 @@ def remove_camera(camera_name):
     finally:
         connection.close()
         return db_error
+
+def get_store_cameras(store_name):
+    db_file = os.path.join(CAMERA_INFO_FOLDER, CAMERA_INFO_DB_FILE)
+    connection = sqlite3.connect(db_file)
+    cursor = connection.cursor()
+    cursor.execute(f"SELECT camera_name FROM cameras WHERE store_name = '{store_name}'")
+    result = cursor.fetchall()
+    connection.close()
+
+    camera_names = []
+    for camera in result:
+        camera_names.append(camera[0])
+    return camera_names
 
 #video utils
 def add_video():
