@@ -1,0 +1,17 @@
+QWidget {
+   background-color: white;
+}
+
+QFrame {
+   border: 2px solid black;
+   border-radius: 2px;
+}
+
+QLabel#heatmap_label, QLabel#emotion_label {
+   border: none;
+}
+
+QLabel#heatmap_description_label, QLabel#emotion_description_label {
+   font-size: 20px;
+   border: none;
+}
