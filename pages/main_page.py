@@ -56,8 +56,6 @@ class MainPage(QWidget):
         heatmap_layout.addWidget(heatmap_label)
         heatmap_layout.addWidget(self.heatmap_description_label)
         
-        #heatmap_frame.setStyleSheet("QFrame { border: 2px solid black }")
-        
         # Emotion Analysis Description
         emotion_frame = QFrame()
         emotion_frame.setFrameShape(QFrame.StyledPanel)
@@ -87,6 +85,21 @@ class MainPage(QWidget):
         overview_layout.addWidget(emotion_frame)
         
         main_layout.addLayout(overview_layout)
+        
+        # User Manual Information
+        detailed_manual = '''
+        Vigilant Desktop Application is a user-friendly application that allows you to monitor customer engagement in real-time.\n
+        The application is designed to provide you with the necessary tools to optimize your store layout and customer experience.\n
+        The application is divided into two sections: Camera Page and Video Page.\n\n
+        The Camera Page allows you to view the live feed from the camera and analyze the customer engagement in real-time.\n
+        In this part, you can add a new camera, view the live feed, and analyze the customer engagement using the heatmap and emotion analysis features.\n\n
+        The Video Page allows you to view the recorded videos and analyze the customer engagement.\n
+        In this part, you can view the recorded videos, analyze the customer engagement using the heatmap and emotion analysis features.\n\n
+        '''
+        self.detailed_manual_label = QLabel(detailed_manual)
+        self.detailed_manual_label.setObjectName("detailed_manual_label")
+        
+        main_layout.addWidget(self.detailed_manual_label)
         
         scroll_area = QScrollArea()
         scroll_area.setObjectName("scroll_area")

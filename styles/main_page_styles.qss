@@ -4,7 +4,7 @@ QWidget {
 
 QFrame {
    border: 2px solid black;
-   border-radius: 2px;
+   border-radius: 10px;
 }
 
 QLabel#heatmap_label, QLabel#emotion_label {
@@ -14,4 +14,14 @@ QLabel#heatmap_label, QLabel#emotion_label {
 QLabel#heatmap_description_label, QLabel#emotion_description_label {
    font-size: 20px;
    border: none;
+   color: #2a3447;
+   text-align: justify;
+}
+
+QLabel#detailed_manual_label {
+   font-family: "Arial";
+   font-size: 20px;
+   border: none;
+   color: #2a3447;
+   text-align: justify;
 }
