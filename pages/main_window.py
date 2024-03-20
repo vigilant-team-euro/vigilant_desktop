@@ -13,7 +13,8 @@ class MainWindow(QMainWindow):
 
    def init_ui(self):
       self.setWindowTitle('Main Window')
-      self.setGeometry(300, 300, 900, 900)
+      self.setGeometry(300, 300, 1350, 900)
+      #self.setMinimumWidth(1300)
 
       menubar = self.menuBar()
 

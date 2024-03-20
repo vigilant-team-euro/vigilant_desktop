@@ -7,9 +7,6 @@ from pages.main_window import MainWindow
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    # Set application icon
-    #app.setWindowIcon(QIcon('images/logo.png'))
-
     login_screen = LoginScreen()
     if login_screen.exec_() == QDialog.Accepted:
         user = login_screen.getUser()
