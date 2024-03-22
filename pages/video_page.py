@@ -2,23 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QDateTime, QObject, QThread, pyqtSignal
 from components.spinner import SpinnerDialog
 import firebase
-import deep_face
-
-class Worker(QObject):
-    finished = pyqtSignal()
-    progress = pyqtSignal(int)
-
-    def __init__(self, user, file_name, store_name, date_time):
-        QObject.__init__(self)
-        self.user = user
-        self.file_name = file_name
-        self.store_name = store_name
-        self.date_time = date_time
-
-    def run(self):
-        deep_face.deep_face(self.file_name, 10, self.user, self.store_name, self.date_time)
-        
-        self.finished.emit()
+import computer_vision
 
 class VideoPage(QWidget):
     def __init__(self,user):
@@ -76,7 +60,7 @@ class VideoPage(QWidget):
         
         self.process_video_button = QPushButton('Process Video')
         self.process_video_button.setObjectName("process_video_button")
-        self.process_video_button.clicked.connect(self.handle_deep_face)
+        self.process_video_button.clicked.connect(self.handle_process_video)
         
         video_layout.addWidget(self.video_label)
         video_layout.addWidget(self.video_upload_description)
@@ -105,7 +89,7 @@ class VideoPage(QWidget):
     def is_empty(self, value):
       return len(value) == 0
 
-    def handle_deep_face(self):
+    def handle_process_video(self):
         self.store_name = self.choose_store_input.currentText()
         if self.is_empty(self.file_name) or self.is_empty(self.user) or self.is_empty(self.store_name):
             error_message = QMessageBox()
@@ -132,3 +116,18 @@ class VideoPage(QWidget):
 
             # Final resets
             self.thread.finished.connect( lambda: self.spinner_dialog.accept() )
+            
+class Worker(QObject):
+    finished = pyqtSignal()
+    progress = pyqtSignal(int)
+
+    def __init__(self, user, file_name, store_name, date_time):
+        QObject.__init__(self)
+        self.user = user
+        self.file_name = file_name
+        self.store_name = store_name
+        self.date_time = date_time
+
+    def run(self):
+        computer_vision.analyze(self.file_name, 10, self.user, self.store_name, self.date_time)
+        self.finished.emit()
