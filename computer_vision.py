@@ -9,10 +9,13 @@ import firebase
 FIREBASE_PUSH_INTERVAL_SECONDS = 60
 SECONDS_IN_MINUTE = 60
 
+YOLO_MODEL_PATH = os.path.join("detection_models", 'yolov8n.pt')
+
 def construct_total_result():
    return {
       "total_age": 0,
-      "total_customer_count": 0,
+      "total_deepface_customer_count": 0, # Number of people detected by deepface
+      "total_detection_customer_count": 0,   # Number of people detected by YOLO
       "total_fear_count": 0,
       "total_happy_count": 0,
       "total_neutral_count": 0,
@@ -25,7 +28,7 @@ def construct_total_result():
       "frame_id":0,
    }
    
-def update_total_result(deepface_result, total_result):
+def update_total_result(deepface_result, people_count, total_result):
    for person in deepface_result:
       emotion = person["dominant_emotion"]
       gender = person["dominant_gender"]
@@ -39,10 +42,13 @@ def update_total_result(deepface_result, total_result):
          total_result["total_female_count"] += 1
          
       total_result["total_age"] += age
-      total_result["total_customer_count"] += 1
+      total_result["total_deepface_customer_count"] += 1
+   
+   total_result["total_detection_customer_count"] += people_count
       
 
 def analyze(video_path:str, frame_interval_seconds:int, username:str, store_name:str, date: datetime):
+   model = YOLO(YOLO_MODEL_PATH)
    output_folder = "output_folder"
 
    cap = cv2.VideoCapture(video_path)
@@ -64,8 +70,18 @@ def analyze(video_path:str, frame_interval_seconds:int, username:str, store_name
       if frame_number % (fps * frame_interval_seconds) == 0:
          output_path = os.path.join(output_folder, f"frame_{frame_number}.jpg")
          cv2.imwrite(output_path, frame)
-         result = DeepFace.analyze(output_path, enforce_detection=False)
-         update_total_result(result, total_result)
+         
+         # Deepface analysis
+         deepface_result = DeepFace.analyze(output_path, enforce_detection=False)
+         
+         # Counting people with YOLO
+         image = cv2.imread(output_path)
+         detection_result = model(image)[0]
+         detections = sv.Detections.from_ultralytics(detection_result)
+         detections = detections[detections.class_id == 0] # Only count people
+         people_count = len(detections)
+         
+         update_total_result(deepface_result, people_count, total_result)
          result_count += 1
          
          if result_count % (FIREBASE_PUSH_INTERVAL_SECONDS / frame_interval_seconds) == 0:
@@ -73,8 +89,8 @@ def analyze(video_path:str, frame_interval_seconds:int, username:str, store_name
             num_of_frames = FIREBASE_PUSH_INTERVAL_SECONDS / frame_interval_seconds
 
             average_result = {
-               "average_age": total_result["total_age"] / total_result["total_customer_count"],
-               "customer_count": total_result["total_customer_count"] / num_of_frames,
+               "average_age": total_result["total_age"] / total_result["total_deepface_customer_count"],
+               "customer_count": total_result["total_detection_customer_count"] / num_of_frames,
                "fear_count": total_result["total_fear_count"] / num_of_frames,
                "happy_count": total_result["total_happy_count"] / num_of_frames,
                "neutral_count": total_result["total_neutral_count"] / num_of_frames,
