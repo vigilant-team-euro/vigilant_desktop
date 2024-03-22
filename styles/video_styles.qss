@@ -46,6 +46,10 @@ QPushButton#process_video_button{
    border-radius: 10px;
 }
 
+QPushButton#process_video_button:hover {
+   background-color: #45a049;
+}
+
 
 QDateTimeEdit {
    font-size: 18px;
