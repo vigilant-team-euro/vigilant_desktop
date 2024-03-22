@@ -42,6 +42,16 @@ def getStoreNames(username):
     
     return store_names
 
+def sendToDb(frames_arr:dict, username:str, store_name:str, date:datetime.datetime ):
+
+    data = {
+            "storeName": store_name,
+            "frames": frames_arr
+        }
+    
+    arr = all_db.collection("users").document(username).collection("stores").document(store_name).collection("data").document(f"{date.day}_{date.month}_{date.year}").set(data)
+
+
 
 
 

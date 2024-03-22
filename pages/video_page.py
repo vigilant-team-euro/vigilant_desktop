@@ -84,4 +84,4 @@ class VideoPage(QWidget):
             self.file_name = file_name
 
     def handle_deep_face(self):
-        deep_face.deep_face(self.file_name, 10)
+        deep_face.deep_face(self.file_name, 10, self.user, self.choose_store_input.currentText(), self.set_datetime_input.dateTime().toPyDateTime())
