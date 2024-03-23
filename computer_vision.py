@@ -5,11 +5,19 @@ import supervision as sv
 from ultralytics import YOLO
 import datetime
 import firebase
+import threading
 
 FIREBASE_PUSH_INTERVAL_SECONDS = 60
 SECONDS_IN_MINUTE = 60
 
 YOLO_MODEL_PATH = os.path.join("detection_models", 'yolov8n.pt')
+
+TEMP_HEATMAP_LOCATION = os.path.join("heatmaps, heatmap.png")
+
+# Global Variables for threading
+frames_arr = []
+annotated_frame = None
+output_folder = "output_folder"
 
 def construct_total_result():
    return {
@@ -46,11 +54,9 @@ def update_total_result(deepface_result, people_count, total_result):
    
    total_result["total_detection_customer_count"] += people_count
       
-
 def analyze(video_path:str, frame_interval_seconds:int, username:str, store_name:str, date: datetime):
    model = YOLO(YOLO_MODEL_PATH)
-   output_folder = "output_folder"
-
+   
    cap = cv2.VideoCapture(video_path)
    fps = int(cap.get(cv2.CAP_PROP_FPS))
    frame_number = 0
@@ -59,7 +65,6 @@ def analyze(video_path:str, frame_interval_seconds:int, username:str, store_name
    start_date = date
    end_date = date + datetime.timedelta(minutes=FIREBASE_PUSH_INTERVAL_SECONDS / SECONDS_IN_MINUTE)
 
-   frames_arr = []
    total_result = construct_total_result()
 
    while True:
@@ -111,31 +116,17 @@ def analyze(video_path:str, frame_interval_seconds:int, username:str, store_name
 
 
       frame_number += 1
-
-   firebase.sendToDb(frames_arr, username, store_name, start_date)
-   print(frames_arr)
-
-   # remove files
-   files = os.listdir(output_folder)
-   for file in files:
-      os.remove(os.path.join(output_folder, file))
-
+      
    cap.release()
 
-   
-HEATMAP_DEFAULT_PATH = 'images/heatmap.png'
-
 def generate_heatmap(source_path:str, interval_seconds:int):
-   model = YOLO('yolov8x.pt')
+   global annotated_frame
+   model = YOLO(YOLO_MODEL_PATH)
    cap = cv2.VideoCapture(source_path)
    fps = int(cap.get(cv2.CAP_PROP_FPS))
 
    heat_map_annotator = sv.HeatMapAnnotator()
-
-   video_info = sv.VideoInfo.from_video_path(video_path=source_path)
    frames_generator = sv.get_video_frames_generator(source_path=source_path, stride=interval_seconds * fps)
-
-   annotated_frame = None
 
    for frame in frames_generator:
       result = model(frame)[0]
@@ -143,5 +134,23 @@ def generate_heatmap(source_path:str, interval_seconds:int):
       annotated_frame = heat_map_annotator.annotate(
          scene=frame.copy(),            
          detections=detections)
-         
-   cv2.imwrite(HEATMAP_DEFAULT_PATH, annotated_frame)
+      
+      
+def process_video(video_path:str, frame_interval_seconds:int, username:str, store_name:str, date: datetime):
+   t1 = threading.Thread(target=analyze, args=(video_path, frame_interval_seconds, username, store_name, date))
+   t2 = threading.Thread(target=generate_heatmap, args=(video_path, frame_interval_seconds))
+   
+   t1.start()
+   t2.start()
+   
+   t1.join()
+   t2.join()
+   
+   firebase.sendToDb(frames_arr, username, store_name, date)
+   cv2.imwrite(TEMP_HEATMAP_LOCATION, annotated_frame)
+   firebase.send_heatmap(username, store_name, date)
+   
+   # remove files
+   files = os.listdir(output_folder)
+   for file in files:
+      os.remove(os.path.join(output_folder, file))

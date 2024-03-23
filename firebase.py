@@ -1,8 +1,11 @@
 import pyrebase
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, storage
 import datetime
 from datetime import timedelta
+import os
+
+TEMP_HEATMAP_LOCATION = os.path.join("heatmaps, heatmap.png")
 
 firebaseConfig = {
   "apiKey": "AIzaSyBxDTNJ-jV6_ln3tSCyASYYacMcESgZtRk",
@@ -32,6 +35,7 @@ def authWithGoogle():
 cred = credentials.Certificate("./firebaseConfig.json")
 app = firebase_admin.initialize_app(cred, {'storageBucket': 'vigilant-36758.appspot.com'})
 all_db = firestore.client()
+bucket = storage.bucket(app=app)
 
 def getStoreNames(username):
     store_names = []
@@ -51,8 +55,13 @@ def sendToDb(frames_arr:dict, username:str, store_name:str, date:datetime.dateti
     
     arr = all_db.collection("users").document(username).collection("stores").document(store_name).collection("data").document(f"{date.day}_{date.month}_{date.year}").set(data)
 
+def send_heatmap(username:str, store_name:str, date:datetime.datetime):
+    
+    folder_path = f"{username}/{store_name}/{date.day}_{date.month}_{date.year}"
+    blobs = bucket.list_blobs(prefix=folder_path)
+    file_count = sum(1 for _ in blobs)
 
-
-
-
-
+    blob = bucket.blob(f"{username}/{store_name}/{date.day}_{date.month}_{date.year}/heatmap_{file_count}.png")
+    blob.upload_from_filename(TEMP_HEATMAP_LOCATION)
+    
+    os.remove(TEMP_HEATMAP_LOCATION)
