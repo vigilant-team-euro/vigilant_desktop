@@ -21,7 +21,7 @@ QLabel#video_upload_description {
    margin-bottom: 80px;
 }
 
-QLabel#upload_video_label, QLabel#set_datetime_label, QLabel#choose_store_label {
+QLabel#upload_video_label, QLabel#set_datetime_label, QLabel#choose_store_label, QLabel#heatmap_label {
    font-size: 20px;
    border: none;
 }

@@ -167,9 +167,17 @@ class CameraPage(QWidget):
       self.set_datetime_input.setFixedWidth(INPUT_WIDTH)
       self.set_datetime_input.setDateTime(QDateTime.currentDateTime())
       
+      self.heatmap_label = QLabel('Generate Heatmap')
+      self.heatmap_label.setObjectName("heatmap_label")
+      
+      self.heatmap_checkbox = QCheckBox()
+      self.heatmap_checkbox.setObjectName("heatmap_checkbox")
+      self.heatmap_checkbox.setChecked(True)
+      
       process_camera_footage_form_layout.addRow(self.choose_store_label, self.choose_store_input)
       process_camera_footage_form_layout.addRow(self.choose_camera_label, self.choose_camera_input)
       process_camera_footage_form_layout.addRow(self.set_datetime_label, self.set_datetime_input)
+      process_camera_footage_form_layout.addRow(self.heatmap_label, self.heatmap_checkbox)
       
       self.start_process_button = QPushButton('Start Process')
       self.start_process_button.setObjectName("start_process_button")

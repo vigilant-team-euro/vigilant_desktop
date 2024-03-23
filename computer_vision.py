@@ -119,7 +119,9 @@ def analyze(video_path:str, frame_interval_seconds:int, username:str, store_name
       
    cap.release()
 
-def generate_heatmap(source_path:str, interval_seconds:int):
+def generate_heatmap(source_path:str, interval_seconds:int, heatmap_generation:bool):
+   if not heatmap_generation:
+      return
    global annotated_frame
    model = YOLO(YOLO_MODEL_PATH)
    cap = cv2.VideoCapture(source_path)
@@ -136,9 +138,9 @@ def generate_heatmap(source_path:str, interval_seconds:int):
          detections=detections)
       
       
-def process_video(video_path:str, frame_interval_seconds:int, username:str, store_name:str, date: datetime):
+def process_video(video_path:str, frame_interval_seconds:int, username:str, store_name:str, date: datetime, heatmap_generation:bool):
    t1 = threading.Thread(target=analyze, args=(video_path, frame_interval_seconds, username, store_name, date))
-   t2 = threading.Thread(target=generate_heatmap, args=(video_path, frame_interval_seconds))
+   t2 = threading.Thread(target=generate_heatmap, args=(video_path, frame_interval_seconds, heatmap_generation))
    
    t1.start()
    t2.start()
@@ -147,8 +149,10 @@ def process_video(video_path:str, frame_interval_seconds:int, username:str, stor
    t2.join()
    
    firebase.sendToDb(frames_arr, username, store_name, date)
-   cv2.imwrite(TEMP_HEATMAP_LOCATION, annotated_frame)
-   firebase.send_heatmap(username, store_name, date)
+   
+   if heatmap_generation:
+      cv2.imwrite(TEMP_HEATMAP_LOCATION, annotated_frame)
+      firebase.send_heatmap(username, store_name, date)
    
    # remove files
    files = os.listdir(output_folder)

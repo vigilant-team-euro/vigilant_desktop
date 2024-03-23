@@ -54,9 +54,18 @@ class VideoPage(QWidget):
         self.choose_store_input.setPlaceholderText('Choose store')
         self.choose_store_input.addItems(firebase.getStoreNames(self.user))
         
+        self.heatmap_label = QLabel('Generate Heatmap')
+        self.heatmap_label.setObjectName("heatmap_label")
+        self.heatmap_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        
+        self.heatmap_checkbox = QCheckBox()
+        self.heatmap_checkbox.setObjectName("heatmap_checkbox")
+        self.heatmap_checkbox.setChecked(True)
+        
         video_upload_form_layout.addRow(self.upload_video_label, self.upload_video_button)
         video_upload_form_layout.addRow(self.set_datetime_label, self.set_datetime_input)
         video_upload_form_layout.addRow(self.choose_store_label, self.choose_store_input)
+        video_upload_form_layout.addRow(self.heatmap_label, self.heatmap_checkbox)
         
         self.process_video_button = QPushButton('Process Video')
         self.process_video_button.setObjectName("process_video_button")
@@ -101,7 +110,8 @@ class VideoPage(QWidget):
 
             self.thread = QThread()
             # Step 3: Create a worker object
-            self.worker = Worker(self.user, self.file_name, self.choose_store_input.currentText(), self.set_datetime_input.dateTime().toPyDateTime())
+            self.worker = Worker(self.user, self.file_name, self.choose_store_input.currentText(), 
+                                 self.set_datetime_input.dateTime().toPyDateTime(), self.heatmap_checkbox.isChecked())
             # Step 4: Move worker to the thread
             self.worker.moveToThread(self.thread)
             # Step 5: Connect signals and slots
@@ -121,13 +131,14 @@ class Worker(QObject):
     finished = pyqtSignal()
     progress = pyqtSignal(int)
 
-    def __init__(self, user, file_name, store_name, date_time):
+    def __init__(self, user, file_name, store_name, date_time, heatmap_checked):
         QObject.__init__(self)
         self.user = user
         self.file_name = file_name
         self.store_name = store_name
         self.date_time = date_time
+        self.heatmap_checked = heatmap_checked
 
     def run(self):
-        computer_vision.process_video(self.file_name, 10, self.user, self.store_name, self.date_time)
+        computer_vision.process_video(self.file_name, 10, self.user, self.store_name, self.date_time, self.heatmap_checked)
         self.finished.emit()
