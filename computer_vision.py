@@ -28,6 +28,7 @@ def construct_total_result():
       "total_happy_count": 0,
       "total_neutral_count": 0,
       "total_sad_count": 0,
+      "total_angry_count": 0,
       "total_surprise_count": 0,
       "total_female_count": 0,
       "total_male_count": 0,
@@ -132,6 +133,7 @@ def generate_heatmap(source_path:str, interval_seconds:int, heatmap_generation:b
 
    for frame in frames_generator:
       result = model(frame)[0]
+      print(result)
       detections = sv.Detections.from_ultralytics(result)
       annotated_frame = heat_map_annotator.annotate(
          scene=frame.copy(),            
