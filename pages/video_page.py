@@ -140,5 +140,5 @@ class Worker(QObject):
         self.heatmap_checked = heatmap_checked
 
     def run(self):
-        computer_vision.process_video(self.file_name, 10, self.user, self.store_name, self.date_time, self.heatmap_checked)
+        computer_vision.process_video(self.file_name, 30, self.user, self.store_name, self.date_time, self.heatmap_checked)
         self.finished.emit()

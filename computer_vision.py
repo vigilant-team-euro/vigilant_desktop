@@ -7,66 +7,67 @@ import datetime
 import firebase
 import threading
 
-FIREBASE_PUSH_INTERVAL_SECONDS = 60
-SECONDS_IN_MINUTE = 60
-
 YOLO_MODEL_PATH = os.path.join("detection_models", 'yolov8n.pt')
 
 TEMP_HEATMAP_LOCATION = os.path.join("heatmaps, heatmap.png")
+
+AGE_INTERVALS = [0, 15, 30, 45, 60]
 
 # Global Variables for threading
 frames_arr = []
 annotated_frame = None
 output_folder = "output_folder"
 
-def construct_total_result():
-   return {
-      "total_age": 0,
-      "total_deepface_customer_count": 0, # Number of people detected by deepface
-      "total_detection_customer_count": 0,   # Number of people detected by YOLO
-      "total_fear_count": 0,
-      "total_happy_count": 0,
-      "total_neutral_count": 0,
-      "total_sad_count": 0,
-      "total_angry_count": 0,
-      "total_surprise_count": 0,
-      "total_female_count": 0,
-      "total_male_count": 0,
-      "start_date": datetime.datetime.now(),
-      "end_date": datetime.datetime.now(),
-      "frame_id":0,
+
+def construct_result(deepface_result, people_count, start_date, end_date):
+   
+   result = {
+      "customer_count": 0,
+      "fear_count": 0,
+      "happy_count": 0,
+      "neutral_count": 0,
+      "sad_count": 0,
+      "surprise_count": 0,
+      "angry_count": 0,
+      "female_count": 0,
+      "male_count": 0,
+      "start_date": start_date,
+      "end_date": end_date,
    }
    
-def update_total_result(deepface_result, people_count, total_result):
+   for i in range(len(AGE_INTERVALS) - 1):
+      result[f"{AGE_INTERVALS[i]}-{AGE_INTERVALS[i]}_age_count"] = 0
+   
    for person in deepface_result:
       emotion = person["dominant_emotion"]
       gender = person["dominant_gender"]
       age = person["age"]
       
-      total_result[f"total_{emotion}_count"] += 1
+      result[f"total_{emotion}_count"] += 1
       
       if gender == "Man":
-         total_result["total_male_count"] += 1
+         result["total_male_count"] += 1
       else:
-         total_result["total_female_count"] += 1
+         result["total_female_count"] += 1
          
-      total_result["total_age"] += age
-      total_result["total_deepface_customer_count"] += 1
-   
-   total_result["total_detection_customer_count"] += people_count
+      for i in range(1, len(AGE_INTERVALS)):
+         if age <= AGE_INTERVALS[i]:
+            result[f"{AGE_INTERVALS[i - 1]}-{AGE_INTERVALS[i]}_age_count"] += 1
       
-def analyze(video_path:str, frame_interval_seconds:int, username:str, store_name:str, date: datetime):
+         
+   result["customer_count"] = people_count
+   
+   return result
+      
+      
+def analyze(video_path:str, frame_interval_seconds:int, date: datetime):
    model = YOLO(YOLO_MODEL_PATH)
    
    cap = cv2.VideoCapture(video_path)
    fps = int(cap.get(cv2.CAP_PROP_FPS))
    frame_number = 0
-   result_count = 0
-   frame_id = 1
    start_date = date
-   end_date = date + datetime.timedelta(minutes=FIREBASE_PUSH_INTERVAL_SECONDS / SECONDS_IN_MINUTE)
-
-   total_result = construct_total_result()
+   end_date = date + datetime.timedelta(seconds=frame_interval_seconds)
 
    while True:
       ret, frame = cap.read()
@@ -87,33 +88,11 @@ def analyze(video_path:str, frame_interval_seconds:int, username:str, store_name
          detections = detections[detections.class_id == 0] # Only count people
          people_count = len(detections)
          
-         update_total_result(deepface_result, people_count, total_result)
-         result_count += 1
+         result = construct_result(deepface_result, people_count, start_date, end_date)
+         frames_arr.append(result)
          
-         if result_count % (FIREBASE_PUSH_INTERVAL_SECONDS / frame_interval_seconds) == 0:
-            
-            num_of_frames = FIREBASE_PUSH_INTERVAL_SECONDS / frame_interval_seconds
-
-            average_result = {
-               "average_age": total_result["total_age"] / total_result["total_deepface_customer_count"],
-               "customer_count": total_result["total_detection_customer_count"] / num_of_frames,
-               "fear_count": total_result["total_fear_count"] / num_of_frames,
-               "happy_count": total_result["total_happy_count"] / num_of_frames,
-               "neutral_count": total_result["total_neutral_count"] / num_of_frames,
-               "sad_count": total_result["total_sad_count"] / num_of_frames,
-               "surprise_count": total_result["total_surprise_count"] / num_of_frames,
-               "female_count": total_result["total_female_count"] / num_of_frames,
-               "male_count": total_result["total_male_count"] / num_of_frames,
-               "start_date": start_date,
-               "end_date": end_date,
-               "frame_id": frame_id,
-            }
-            
-            frame_id += 1
-            start_date += datetime.timedelta(minutes=FIREBASE_PUSH_INTERVAL_SECONDS / SECONDS_IN_MINUTE)
-            end_date += datetime.timedelta(minutes=FIREBASE_PUSH_INTERVAL_SECONDS / SECONDS_IN_MINUTE)
-            frames_arr.append(average_result)
-            total_result = construct_total_result()
+         start_date += datetime.timedelta(seconds=frame_interval_seconds)
+         end_date += datetime.timedelta(seconds=frame_interval_seconds)
 
 
       frame_number += 1
@@ -141,7 +120,7 @@ def generate_heatmap(source_path:str, interval_seconds:int, heatmap_generation:b
       
       
 def process_video(video_path:str, frame_interval_seconds:int, username:str, store_name:str, date: datetime, heatmap_generation:bool):
-   t1 = threading.Thread(target=analyze, args=(video_path, frame_interval_seconds, username, store_name, date))
+   t1 = threading.Thread(target=analyze, args=(video_path, frame_interval_seconds, date))
    t2 = threading.Thread(target=generate_heatmap, args=(video_path, frame_interval_seconds, heatmap_generation))
    
    t1.start()
