@@ -4,8 +4,9 @@ from firebase_admin import credentials, firestore, storage
 import datetime
 from datetime import timedelta
 import os
+import json
 
-TEMP_HEATMAP_LOCATION = os.path.join("heatmaps, heatmap.png")
+TEMP_HEATMAP_LOCATION = os.path.join("heatmaps, heatmap.json")
 
 firebaseConfig = {
   "apiKey": "AIzaSyBxDTNJ-jV6_ln3tSCyASYYacMcESgZtRk",
@@ -55,13 +56,25 @@ def sendToDb(frames_arr:dict, username:str, store_name:str, date:datetime.dateti
     
     arr = all_db.collection("users").document(username).collection("stores").document(store_name).collection("data").document(f"{date.day}_{date.month}_{date.year}").set(data)
 
-def send_heatmap(username:str, store_name:str, date:datetime.datetime):
+def send_heatmap(annotated_frames:dict, username:str, store_name:str, camera_name:str):
     
-    folder_path = f"{username}/{store_name}/{date.day}_{date.month}_{date.year}"
-    blobs = bucket.list_blobs(prefix=folder_path)
-    file_count = sum(1 for _ in blobs)
-
-    blob = bucket.blob(f"{username}/{store_name}/{date.day}_{date.month}_{date.year}/heatmap_{file_count}.png")
-    blob.upload_from_filename(TEMP_HEATMAP_LOCATION)
+    file_name_firebase = f"view_heatmap.json" if camera_name == None else f"{camera_name}_heatmap.json"
+    file_path_firebase = f"{username}/{store_name}/{file_name_firebase}"
     
-    os.remove(TEMP_HEATMAP_LOCATION)
+    temp_annotated_frames = {}
+    blob = bucket.blob(file_path_firebase)
+    
+    if blob.exists():
+        blob.download_to_filename(TEMP_HEATMAP_LOCATION)
+        with open(TEMP_HEATMAP_LOCATION, "r") as f:
+            data = f.read()
+            
+        temp_annotated_frames = json.loads(data)
+        
+        for key, value in annotated_frames.items():
+            temp_annotated_frames[key] = value
+    else:
+        temp_annotated_frames = annotated_frames
+    
+    json_data = json.dumps(temp_annotated_frames)
+    blob.upload_from_string(json_data)

@@ -1,9 +1,10 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QDateTime, QThread, pyqtSignal
+from PyQt5.QtCore import Qt, QDateTime, QThread, QObject, pyqtSignal
 import utils
 import ipaddress
 from components.spinner import SpinnerDialog
 import firebase
+import computer_vision
 
 TABLE_HORIZONTAL_HEADERS = ["Camera Name", "IP Address", "Store", "Footage", "Delete"]
 
@@ -141,7 +142,6 @@ class CameraPage(QWidget):
       
       self.process_description_label = QLabel('Please choose the store and camera you want to process the footage for.')
       self.process_description_label.setObjectName("process_description_label")
-      self.process_description_label.setObjectName("process_description_label")
       self.process_description_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
       
       process_camera_footage_form_layout = QFormLayout()
@@ -161,12 +161,6 @@ class CameraPage(QWidget):
       self.choose_store_input.addItems(firebase.getStoreNames(self.user))
       self.choose_store_input.currentTextChanged.connect(self.update_camera_combobox)
       
-      self.set_datetime_label = QLabel('Set Date and Time')
-      self.set_datetime_label.setObjectName("set_datetime_label")
-      self.set_datetime_input = QDateTimeEdit()
-      self.set_datetime_input.setFixedWidth(INPUT_WIDTH)
-      self.set_datetime_input.setDateTime(QDateTime.currentDateTime())
-      
       self.heatmap_label = QLabel('Generate Heatmap')
       self.heatmap_label.setObjectName("heatmap_label")
       
@@ -176,11 +170,11 @@ class CameraPage(QWidget):
       
       process_camera_footage_form_layout.addRow(self.choose_store_label, self.choose_store_input)
       process_camera_footage_form_layout.addRow(self.choose_camera_label, self.choose_camera_input)
-      process_camera_footage_form_layout.addRow(self.set_datetime_label, self.set_datetime_input)
       process_camera_footage_form_layout.addRow(self.heatmap_label, self.heatmap_checkbox)
       
       self.start_process_button = QPushButton('Start Process')
       self.start_process_button.setObjectName("start_process_button")
+      self.start_process_button.clicked.connect(self.handle_start_process)
       
       process_camera_footage_layout.addWidget(self.process_description_label)
       process_camera_footage_layout.addLayout(process_camera_footage_form_layout)
@@ -300,6 +294,31 @@ class CameraPage(QWidget):
          else:
             camera_name = self.table.item(item.row(), 0).text()
             utils.edit_camera_ip(camera_name, item.text())
+            
+   def handle_start_process(self):
+      if self.choose_camera_input.currentText() == None or self.choose_store_input.currentText() == None:
+         error_message = QMessageBox()
+         error_message.setIcon(QMessageBox.Critical)
+         error_message.setWindowTitle("Error")
+         error_message.setText("Please fill in all the fields")
+         error_message.exec_()
+         return
+      else:
+         camera_name = self.choose_camera_input.currentText()
+         store_name = self.choose_store_input.currentText()
+         heatmap_generation = self.heatmap_checkbox.isChecked()
+         
+         self.thread = QThread()
+         self.worker = Worker(self.user, camera_name, store_name, heatmap_generation)
+         self.worker.moveToThread(self.thread)
+         self.thread.started.connect(self.worker.run)
+         self.worker.finished.connect(self.thread.quit)
+         self.worker.finished.connect(self.worker.deleteLater)
+         self.thread.finished.connect(self.thread.deleteLater)
+         self.thread.start()
+         self.spinner_dialog = SpinnerDialog(f"Processing footage for {camera_name} ...")
+         self.spinner_dialog.show()
+         self.thread.finished.connect( lambda: self.spinner_dialog.accept() )
 
    # HELPER FUNCTIONS
    def update_camera_table(self):
@@ -379,3 +398,19 @@ class CameraPage(QWidget):
       def run(self):
          error = utils.show_live_footage(self.camera_name)
          self.finished.emit(error)
+   
+class Worker(QObject):
+   finished = pyqtSignal()
+   progress = pyqtSignal(int)
+
+   def __init__(self, user, camera_name, store_name, heatmap_checked):
+      QObject.__init__(self)
+      self.user = user
+      self.camera_name = camera_name
+      self.store_name = store_name
+      self.heatmap_checked = heatmap_checked
+
+   def run(self):
+      rtsp_url = utils.construct_rtsp_url(self.camera_name)
+      computer_vision.process_live_camera_footage(rtsp_url, 30, self.user, self.store_name, QDateTime.currentDateTime().toPyDateTime(), self.heatmap_checked)
+      self.finished.emit()

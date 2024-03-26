@@ -9,15 +9,9 @@ import threading
 
 YOLO_MODEL_PATH = os.path.join("detection_models", 'yolov8n.pt')
 
-TEMP_HEATMAP_LOCATION = os.path.join("heatmaps, heatmap.png")
-
 AGE_INTERVALS = [0, 15, 30, 45, 60]
 
-# Global Variables for threading
-frames_arr = []
-annotated_frame = None
 output_folder = "output_folder"
-
 
 def construct_result(deepface_result, people_count, start_date, end_date):
    
@@ -60,10 +54,14 @@ def construct_result(deepface_result, people_count, start_date, end_date):
    return result
       
       
-def analyze(video_path:str, frame_interval_seconds:int, date: datetime):
-   model = YOLO(YOLO_MODEL_PATH)
+def analyze(source:str, frame_interval_seconds:int, date: datetime, heatmap_generation:bool):
+   frames_arr = []
+   annotated_frame_arr = {}
    
-   cap = cv2.VideoCapture(video_path)
+   model = YOLO(YOLO_MODEL_PATH)
+   heat_map_annotator = sv.HeatMapAnnotator()
+   
+   cap = cv2.VideoCapture(source)
    fps = int(cap.get(cv2.CAP_PROP_FPS))
    frame_number = 0
    start_date = date
@@ -91,51 +89,39 @@ def analyze(video_path:str, frame_interval_seconds:int, date: datetime):
          result = construct_result(deepface_result, people_count, start_date, end_date)
          frames_arr.append(result)
          
+         if heatmap_generation:
+            annotated_frame = heat_map_annotator.annotate(scene=frame.copy(), detections=detections)
+            annotated_frame_arr[start_date] = annotated_frame
+         
          start_date += datetime.timedelta(seconds=frame_interval_seconds)
          end_date += datetime.timedelta(seconds=frame_interval_seconds)
-
 
       frame_number += 1
       
    cap.release()
-
-def generate_heatmap(source_path:str, interval_seconds:int, heatmap_generation:bool):
-   if not heatmap_generation:
-      return
-   global annotated_frame
-   model = YOLO(YOLO_MODEL_PATH)
-   cap = cv2.VideoCapture(source_path)
-   fps = int(cap.get(cv2.CAP_PROP_FPS))
-
-   heat_map_annotator = sv.HeatMapAnnotator()
-   frames_generator = sv.get_video_frames_generator(source_path=source_path, stride=interval_seconds * fps)
-
-   for frame in frames_generator:
-      result = model(frame)[0]
-      print(result)
-      detections = sv.Detections.from_ultralytics(result)
-      annotated_frame = heat_map_annotator.annotate(
-         scene=frame.copy(),            
-         detections=detections)
-      
+   
+   return frames_arr, annotated_frame_arr
       
 def process_video(video_path:str, frame_interval_seconds:int, username:str, store_name:str, date: datetime, heatmap_generation:bool):
-   t1 = threading.Thread(target=analyze, args=(video_path, frame_interval_seconds, date))
-   t2 = threading.Thread(target=generate_heatmap, args=(video_path, frame_interval_seconds, heatmap_generation))
-   
-   t1.start()
-   t2.start()
-   
-   t1.join()
-   t2.join()
+   frames_arr, annotated_frame_arr = analyze(video_path, frame_interval_seconds, date, heatmap_generation)
    
    firebase.sendToDb(frames_arr, username, store_name, date)
    
    if heatmap_generation:
-      cv2.imwrite(TEMP_HEATMAP_LOCATION, annotated_frame)
-      firebase.send_heatmap(username, store_name, date)
+      firebase.send_heatmap(annotated_frame_arr, username, store_name, None)
    
-   # remove files
+   files = os.listdir(output_folder)
+   for file in files:
+      os.remove(os.path.join(output_folder, file))
+      
+def process_live_camera_footage(rtsp_url:str, frame_interval_seconds:int, username:str, store_name:str, date: datetime, heatmap_generation:bool):
+   frames_arr, annotated_frame_arr = analyze(rtsp_url, frame_interval_seconds, date, heatmap_generation)
+   
+   firebase.sendToDb(frames_arr, username, store_name, date)
+   
+   if heatmap_generation:
+      firebase.send_heatmap(annotated_frame_arr, username, store_name, None)
+      
    files = os.listdir(output_folder)
    for file in files:
       os.remove(os.path.join(output_folder, file))

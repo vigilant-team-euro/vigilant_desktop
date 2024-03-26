@@ -89,15 +89,7 @@ def get_store_cameras(store_name):
         camera_names.append(camera[0])
     return camera_names
 
-#video utils
-def add_video():
-    pass
-
-def process_video():
-    pass
-
-def show_live_footage(camera_name):
-    error = ""
+def construct_rtsp_url(camera_name):
     db_file = os.path.join(CAMERA_INFO_FOLDER, CAMERA_INFO_DB_FILE)
     connection = sqlite3.connect(db_file)
     cursor = connection.cursor()
@@ -111,7 +103,12 @@ def show_live_footage(camera_name):
     
     connection.close()
     
-    rtsp_url = f"rtsp://{username}:{password}@{ip_address}:{port}/stream2"
+    return f"rtsp://{username}:{password}@{ip_address}:{port}/stream2"
+
+def show_live_footage(camera_name):
+    error = ""
+    
+    rtsp_url = construct_rtsp_url(camera_name)
     
     cap = cv2.VideoCapture(rtsp_url)
     
