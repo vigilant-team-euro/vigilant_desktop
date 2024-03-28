@@ -5,7 +5,6 @@ import supervision as sv
 from ultralytics import YOLO
 import datetime
 import firebase
-import threading
 
 YOLO_MODEL_PATH = os.path.join("detection_models", 'yolov8n.pt')
 
@@ -30,19 +29,21 @@ def construct_result(deepface_result, people_count, start_date, end_date):
    }
    
    for i in range(len(AGE_INTERVALS) - 1):
-      result[f"{AGE_INTERVALS[i]}-{AGE_INTERVALS[i]}_age_count"] = 0
+      result[f"{AGE_INTERVALS[i]}-{AGE_INTERVALS[i + 1]}_age_count"] = 0
+   
+   print(result)
    
    for person in deepface_result:
       emotion = person["dominant_emotion"]
       gender = person["dominant_gender"]
       age = person["age"]
       
-      result[f"total_{emotion}_count"] += 1
+      result[f"{emotion}_count"] += 1
       
       if gender == "Man":
-         result["total_male_count"] += 1
+         result["male_count"] += 1
       else:
-         result["total_female_count"] += 1
+         result["female_count"] += 1
          
       for i in range(1, len(AGE_INTERVALS)):
          if age <= AGE_INTERVALS[i]:
@@ -55,6 +56,9 @@ def construct_result(deepface_result, people_count, start_date, end_date):
       
       
 def analyze(source:str, frame_interval_seconds:int, date: datetime, heatmap_generation:bool):
+   if os.path.exists(os.path.join(os.getcwd(), output_folder)):
+      os.mkdir(os.path.join(os.getcwd(), output_folder))
+   
    frames_arr = []
    annotated_frame_arr = {}
    
@@ -91,7 +95,7 @@ def analyze(source:str, frame_interval_seconds:int, date: datetime, heatmap_gene
          
          if heatmap_generation:
             annotated_frame = heat_map_annotator.annotate(scene=frame.copy(), detections=detections)
-            annotated_frame_arr[start_date] = annotated_frame.tolist()
+            annotated_frame_arr[str(start_date)] = annotated_frame.tolist()
          
          start_date += datetime.timedelta(seconds=frame_interval_seconds)
          end_date += datetime.timedelta(seconds=frame_interval_seconds)
