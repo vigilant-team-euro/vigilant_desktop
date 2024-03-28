@@ -412,5 +412,5 @@ class Worker(QObject):
 
    def run(self):
       rtsp_url = utils.construct_rtsp_url(self.camera_name)
-      computer_vision.process_live_camera_footage(rtsp_url, 30, self.user, self.store_name, QDateTime.currentDateTime().toPyDateTime(), self.heatmap_checked)
+      computer_vision.process_live_camera_footage(rtsp_url, 30, self.user, self.store_name, self.camera_name, QDateTime.currentDateTime().toPyDateTime(), self.heatmap_checked)
       self.finished.emit()

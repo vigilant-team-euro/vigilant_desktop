@@ -91,7 +91,7 @@ def analyze(source:str, frame_interval_seconds:int, date: datetime, heatmap_gene
          
          if heatmap_generation:
             annotated_frame = heat_map_annotator.annotate(scene=frame.copy(), detections=detections)
-            annotated_frame_arr[start_date] = annotated_frame
+            annotated_frame_arr[start_date] = annotated_frame.tolist()
          
          start_date += datetime.timedelta(seconds=frame_interval_seconds)
          end_date += datetime.timedelta(seconds=frame_interval_seconds)
@@ -114,13 +114,13 @@ def process_video(video_path:str, frame_interval_seconds:int, username:str, stor
    for file in files:
       os.remove(os.path.join(output_folder, file))
       
-def process_live_camera_footage(rtsp_url:str, frame_interval_seconds:int, username:str, store_name:str, date: datetime, heatmap_generation:bool):
+def process_live_camera_footage(rtsp_url:str, frame_interval_seconds:int, username:str, store_name:str, camera_name: str, date: datetime, heatmap_generation:bool):
    frames_arr, annotated_frame_arr = analyze(rtsp_url, frame_interval_seconds, date, heatmap_generation)
    
    firebase.sendToDb(frames_arr, username, store_name, date)
    
    if heatmap_generation:
-      firebase.send_heatmap(annotated_frame_arr, username, store_name, None)
+      firebase.send_heatmap(annotated_frame_arr, username, store_name, camera_name)
       
    files = os.listdir(output_folder)
    for file in files:
