@@ -5,7 +5,6 @@ import supervision as sv
 from ultralytics import YOLO
 import datetime
 import firebase
-import numpy as np
 import utils
 
 YOLO_MODEL_PATH = os.path.join("detection_models", 'yolov8n.pt')

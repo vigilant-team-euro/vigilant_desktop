@@ -2,7 +2,6 @@ import pyrebase
 import firebase_admin
 from firebase_admin import credentials, firestore, storage
 import datetime
-from datetime import timedelta
 import os
 import numpy as np
 
