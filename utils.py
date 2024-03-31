@@ -2,6 +2,8 @@ import os
 import sqlite3
 import cv2
 from firebase import authWithMail
+import numpy as np
+from PIL import Image
 
 CAMERA_INFO_FOLDER = "camera_info_data"
 CAMERA_INFO_DB_FILE = "camera_information.db"
@@ -89,15 +91,7 @@ def get_store_cameras(store_name):
         camera_names.append(camera[0])
     return camera_names
 
-#video utils
-def add_video():
-    pass
-
-def process_video():
-    pass
-
-def show_live_footage(camera_name):
-    error = ""
+def construct_rtsp_url(camera_name):
     db_file = os.path.join(CAMERA_INFO_FOLDER, CAMERA_INFO_DB_FILE)
     connection = sqlite3.connect(db_file)
     cursor = connection.cursor()
@@ -111,7 +105,12 @@ def show_live_footage(camera_name):
     
     connection.close()
     
-    rtsp_url = f"rtsp://{username}:{password}@{ip_address}:{port}/stream2"
+    return f"rtsp://{username}:{password}@{ip_address}:{port}/stream2"
+
+def show_live_footage(camera_name):
+    error = ""
+    
+    rtsp_url = construct_rtsp_url(camera_name)
     
     cap = cv2.VideoCapture(rtsp_url)
     
@@ -139,3 +138,16 @@ def show_live_footage(camera_name):
     cap.release()
     cv2.destroyAllWindows()
     return error
+
+def resize_heatmap(heatmap_arr: np.ndarray, target_height):
+    new_heatmap_arr = []
+    for heatmap in heatmap_arr:
+        heatmap_img = Image.fromarray(heatmap)
+        aspect_ratio = heatmap_img.width / heatmap_img.height
+        new_width = int(target_height * aspect_ratio)
+        new_height = target_height
+        
+        heatmap_img = heatmap_img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        new_heatmap_arr.append(np.array(heatmap_img))
+        
+    return np.array(new_heatmap_arr)

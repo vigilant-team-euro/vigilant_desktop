@@ -1,8 +1,12 @@
 import pyrebase
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, storage
 import datetime
 from datetime import timedelta
+import os
+import numpy as np
+
+TEMP_HEATMAP_LOCATION = os.path.join("heatmaps, heatmap.npy")
 
 firebaseConfig = {
   "apiKey": "AIzaSyBxDTNJ-jV6_ln3tSCyASYYacMcESgZtRk",
@@ -32,6 +36,7 @@ def authWithGoogle():
 cred = credentials.Certificate("./firebaseConfig.json")
 app = firebase_admin.initialize_app(cred, {'storageBucket': 'vigilant-36758.appspot.com'})
 all_db = firestore.client()
+bucket = storage.bucket(app=app)
 
 def getStoreNames(username):
     store_names = []
@@ -42,7 +47,25 @@ def getStoreNames(username):
     
     return store_names
 
+def sendToDb(frames_arr:dict, username:str, store_name:str, date:datetime.datetime ):
 
+    data = {
+            "storeName": store_name,
+            "frames": frames_arr
+        }
+    
+    arr = all_db.collection("users").document(username).collection("stores").document(store_name).collection("data").document(f"{date.day}_{date.month}_{date.year}").set(data)
 
-
-
+def send_heatmap(heatmap:dict, username:str, store_name:str, camera_name:str):
+    
+    timestamp = heatmap["timestamp"]
+    heatmap_nparray = heatmap["heatmap"]
+    
+    file_name_firebase = f"view_{timestamp}.npy" if camera_name == None else f"{camera_name}_{timestamp}.json"
+    file_path_firebase = f"{username}/{store_name}/{file_name_firebase}"
+    
+    blob = bucket.blob(file_path_firebase)
+    
+    np.save(TEMP_HEATMAP_LOCATION, heatmap_nparray)
+    blob.upload_from_filename(TEMP_HEATMAP_LOCATION)
+    os.remove(TEMP_HEATMAP_LOCATION)
