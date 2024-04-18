@@ -61,7 +61,6 @@ def analyze(source:str, frame_interval_seconds:int, date: datetime, heatmap_gene
       os.mkdir(os.path.join(os.getcwd(), output_folder))
    
    frames_arr = []
-   heatmap = {}
    
    model = YOLO(YOLO_MODEL_PATH)
    heat_map_annotator = sv.HeatMapAnnotator()
@@ -71,9 +70,6 @@ def analyze(source:str, frame_interval_seconds:int, date: datetime, heatmap_gene
    frame_number = 0
    start_date = date
    end_date = date + datetime.timedelta(seconds=frame_interval_seconds)
-   
-   heatmap['timestamp'] = str(start_date)
-   heatmap['heatmap'] = []
 
    while True:
       ret, frame = cap.read()
@@ -99,7 +95,6 @@ def analyze(source:str, frame_interval_seconds:int, date: datetime, heatmap_gene
          
          if heatmap_generation:
             annotated_frame = heat_map_annotator.annotate(scene=frame.copy(), detections=detections)
-            heatmap['heatmap'].append(annotated_frame)
          
          start_date += datetime.timedelta(seconds=frame_interval_seconds)
          end_date += datetime.timedelta(seconds=frame_interval_seconds)
@@ -108,7 +103,7 @@ def analyze(source:str, frame_interval_seconds:int, date: datetime, heatmap_gene
       
    cap.release()
    
-   return frames_arr, heatmap
+   return frames_arr, annotated_frame
       
 def process_video(video_path:str, frame_interval_seconds:int, username:str, store_name:str, date: datetime, heatmap_generation:bool):
    frames_arr, heatmap = analyze(video_path, frame_interval_seconds, date, heatmap_generation)
@@ -116,8 +111,7 @@ def process_video(video_path:str, frame_interval_seconds:int, username:str, stor
    firebase.sendToDb(frames_arr, username, store_name, date)
    
    if heatmap_generation:
-      heatmap["heatmap"] = utils.resize_heatmap(heatmap["heatmap"], 512)
-      firebase.send_heatmap(heatmap, username, store_name, None)
+      firebase.send_heatmap(heatmap, username, store_name, date, None)
    
    files = os.listdir(output_folder)
    for file in files:
@@ -129,8 +123,7 @@ def process_live_camera_footage(rtsp_url:str, frame_interval_seconds:int, userna
    firebase.sendToDb(frames_arr, username, store_name, date)
    
    if heatmap_generation:
-      heatmap["heatmap"] = utils.resize_heatmap(heatmap["heatmap"], 512)
-      firebase.send_heatmap(heatmap, username, store_name, camera_name)
+      firebase.send_heatmap(heatmap, username, store_name, date, camera_name)
       
    files = os.listdir(output_folder)
    for file in files:

@@ -4,8 +4,9 @@ from firebase_admin import credentials, firestore, storage
 import datetime
 import os
 import numpy as np
+from PIL import Image
 
-TEMP_HEATMAP_LOCATION = os.path.join("heatmaps, heatmap.npy")
+TEMP_HEATMAP_LOCATION = os.path.join("heatmaps, heatmap.png")
 
 firebaseConfig = {
   "apiKey": "AIzaSyBxDTNJ-jV6_ln3tSCyASYYacMcESgZtRk",
@@ -55,16 +56,15 @@ def sendToDb(frames_arr:dict, username:str, store_name:str, date:datetime.dateti
     
     arr = all_db.collection("users").document(username).collection("stores").document(store_name).collection("data").document(f"{date.day}_{date.month}_{date.year}").set(data)
 
-def send_heatmap(heatmap:dict, username:str, store_name:str, camera_name:str):
+def send_heatmap(heatmap:np.ndarray, username:str, store_name:str, date, camera_name:str):
     
-    timestamp = heatmap["timestamp"]
-    heatmap_nparray = heatmap["heatmap"]
-    
-    file_name_firebase = f"view_{timestamp}.npy" if camera_name == None else f"{camera_name}_{timestamp}.json"
+    file_name_firebase = f"view_{date}.png" if camera_name == None else f"{camera_name}_{date}.png"
     file_path_firebase = f"{username}/{store_name}/{file_name_firebase}"
     
     blob = bucket.blob(file_path_firebase)
     
-    np.save(TEMP_HEATMAP_LOCATION, heatmap_nparray)
+    heatmap_image = Image.fromarray(heatmap)
+    heatmap_image.save(TEMP_HEATMAP_LOCATION)
+    
     blob.upload_from_filename(TEMP_HEATMAP_LOCATION)
     os.remove(TEMP_HEATMAP_LOCATION)
