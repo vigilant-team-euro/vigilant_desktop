@@ -18,10 +18,12 @@ output_folder = "output_folder"
 
 class CameraPage(QWidget):
     
-   def __init__(self, user):
+   def __init__(self, user_info):
       super().__init__()
       self.ip_addresses = []
-      self.user = user
+      self.user = user_info['user']
+      self.stores = user_info['stores'].keys()
+      self.storeIds = user_info['stores']
       self.initUI()
 
    def initUI(self):
@@ -121,7 +123,7 @@ class CameraPage(QWidget):
       self.store_name_label.setObjectName("store_name_label")
       self.store_name_combobox.setFixedWidth(INPUT_WIDTH)
       self.store_name_combobox.setPlaceholderText('Choose store name')
-      self.store_name_combobox.addItems(firebase.getStoreNames(self.user))
+      self.store_name_combobox.addItems(self.stores)
       
       add_camera_form_layout.addRow(self.camera_name_label, self.camera_name_input)
       add_camera_form_layout.addRow(self.camera_ip_label, self.camera_ip_input)
@@ -166,7 +168,7 @@ class CameraPage(QWidget):
       self.choose_store_input = QComboBox()
       self.choose_store_input.setFixedWidth(INPUT_WIDTH)
       self.choose_store_input.setPlaceholderText('Choose store')
-      self.choose_store_input.addItems(firebase.getStoreNames(self.user))
+      self.choose_store_input.addItems(self.stores)
       self.choose_store_input.currentTextChanged.connect(self.update_camera_combobox)
       
       self.heatmap_label = QLabel('Generate Heatmap')
@@ -315,9 +317,10 @@ class CameraPage(QWidget):
          camera_name = self.choose_camera_input.currentText()
          store_name = self.choose_store_input.currentText()
          heatmap_generation = self.heatmap_checkbox.isChecked()
+         store_id = self.storeIds[store_name]
          
          self.thread = QThread()
-         self.worker = Worker(self.user, camera_name, store_name, heatmap_generation)
+         self.worker = Worker(self.user, camera_name, store_name, store_id, heatmap_generation)
          self.worker.moveToThread(self.thread)
          self.thread.started.connect(self.worker.run)
          self.worker.finished.connect(self.thread.quit)
@@ -391,6 +394,7 @@ class CameraPage(QWidget):
    def update_camera_combobox(self):
       self.choose_camera_input.clear()
       store_name = self.choose_store_input.currentText()
+      print(store_name)
       if store_name != None:
          self.choose_camera_input.addItems(utils.get_store_cameras(store_name))
 
@@ -411,11 +415,12 @@ class Worker(QObject):
    finished = pyqtSignal()
    progress = pyqtSignal(int)
 
-   def __init__(self, user, camera_name, store_name, heatmap_checked):
+   def __init__(self, user, camera_name, store_name, store_id, heatmap_checked):
       QObject.__init__(self)
       self.user = user
       self.camera_name = camera_name
       self.store_name = store_name
+      self.store_id = store_id
       self.heatmap_checked = heatmap_checked
       self.running = True
 
@@ -429,6 +434,7 @@ class Worker(QObject):
          os.mkdir(os.path.join(os.getcwd(), output_folder))
       
       frames_arr = []
+      annotated_frame = None
    
       model = YOLO(computer_vision.YOLO_MODEL_PATH)
       heat_map_annotator = sv.HeatMapAnnotator()
@@ -475,7 +481,7 @@ class Worker(QObject):
       
       cap.release()
       
-      firebase.sendToDb(frames_arr, self.user, self.store_name, date)
+      firebase.sendToDb(frames_arr, self.user, self.store_id, date)
    
       if heatmap_generation:
          firebase.send_heatmap(annotated_frame, self.user, self.store_name, date, self.camera_name)

@@ -61,6 +61,7 @@ def analyze(source:str, frame_interval_seconds:int, date: datetime, heatmap_gene
       os.mkdir(os.path.join(os.getcwd(), output_folder))
    
    frames_arr = []
+   annotated_frame = None
    
    model = YOLO(YOLO_MODEL_PATH)
    heat_map_annotator = sv.HeatMapAnnotator()
@@ -105,10 +106,10 @@ def analyze(source:str, frame_interval_seconds:int, date: datetime, heatmap_gene
    
    return frames_arr, annotated_frame
       
-def process_video(video_path:str, frame_interval_seconds:int, username:str, store_name:str, date: datetime, heatmap_generation:bool):
+def process_video(video_path:str, frame_interval_seconds:int, username:str, store_name:str, store_id:str, date: datetime, heatmap_generation:bool):
    frames_arr, heatmap = analyze(video_path, frame_interval_seconds, date, heatmap_generation)
    
-   firebase.sendToDb(frames_arr, username, store_name, date)
+   firebase.sendToDb(frames_arr, username, store_id, date)
    
    if heatmap_generation:
       firebase.send_heatmap(heatmap, username, store_name, date, None)
@@ -117,14 +118,3 @@ def process_video(video_path:str, frame_interval_seconds:int, username:str, stor
    for file in files:
       os.remove(os.path.join(output_folder, file))
       
-def process_live_camera_footage(rtsp_url:str, frame_interval_seconds:int, username:str, store_name:str, camera_name: str, date: datetime, heatmap_generation:bool):
-   frames_arr, heatmap = analyze(rtsp_url, frame_interval_seconds, date, heatmap_generation)
-   
-   firebase.sendToDb(frames_arr, username, store_name, date)
-   
-   if heatmap_generation:
-      firebase.send_heatmap(heatmap, username, store_name, date, camera_name)
-      
-   files = os.listdir(output_folder)
-   for file in files:
-      os.remove(os.path.join(output_folder, file))

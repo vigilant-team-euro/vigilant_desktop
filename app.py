@@ -9,8 +9,8 @@ if __name__ == '__main__':
 
     login_screen = LoginScreen()
     if login_screen.exec_() == QDialog.Accepted:
-        user = login_screen.getUser()
-        main_window = MainWindow(user=user)
+        user_info = login_screen.getUserInfo()
+        main_window = MainWindow(user_info=user_info)
         main_window.show()
 
     sys.exit(app.exec_())

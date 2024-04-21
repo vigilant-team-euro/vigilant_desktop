@@ -110,10 +110,10 @@ class LoginScreen(QDialog):
             error_message.exec_()
             return
         
-        user = utils.auth_user(email, password)
+        user_info = utils.auth_user(email, password)
         # Add your authentication logic here
-        if user != "":
-            self.user = user
+        if user_info['user'] != "":
+            self.user_info = user_info
             self.accept()
         else:
             error_message = QMessageBox()
@@ -129,5 +129,5 @@ class LoginScreen(QDialog):
         else:
             QMessageBox.warning(self, 'Login Failed', 'Invalid email or password')
 
-    def getUser(self):
-        return self.user
+    def getUserInfo(self):
+        return self.user_info
