@@ -47,11 +47,15 @@ def getStores(userId):
     return stores
 
 def sendToDb(frames_arr:dict, username:str, store_id:str, date:datetime.datetime ):
-
-    data = {
-            "storeName": store_id,
-            "frames": frames_arr
-        }
+    doc = all_db.collection("users").document(username).collection("stores").document(store_id).collection("data").document(f"{date.day}_{date.month}_{date.year}")
+    if doc.get().exists:
+        data = doc.get().to_dict()
+        data["frames"] += frames_arr
+    else:
+        data = {
+                "storeName": store_id,
+                "frames": frames_arr
+            }
     
     arr = all_db.collection("users").document(username).collection("stores").document(store_id).collection("data").document(f"{date.day}_{date.month}_{date.year}").set(data)
 
