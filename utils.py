@@ -13,7 +13,7 @@ os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "timeout;1000"
 #auth from firebase, return True if success
 def auth_user(username, password):
     user = authWithMail(username, password)
-    stores = getStores(user)
+    stores = getStores(user) if user != "" else None
 
     user_info = {
         'user': user,
