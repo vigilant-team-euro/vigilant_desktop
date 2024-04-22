@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import cv2
-from firebase import authWithMail
+from firebase import authWithMail, getStores
 import numpy as np
 from PIL import Image
 
@@ -13,10 +13,13 @@ os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "timeout;1000"
 #auth from firebase, return True if success
 def auth_user(username, password):
     user = authWithMail(username, password)
-    if "@" in user:
-        return user
-    else:
-        return ""
+    stores = getStores(user)
+
+    user_info = {
+        'user': user,
+        'stores': stores
+    }
+    return user_info
         
 def auth_user_google():
     return True

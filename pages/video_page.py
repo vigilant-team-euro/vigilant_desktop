@@ -1,13 +1,14 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QDateTime, QObject, QThread, pyqtSignal
 from components.spinner import SpinnerDialog
-import firebase
 import computer_vision
 
 class VideoPage(QWidget):
-    def __init__(self,user):
+    def __init__(self, user_info):
         super().__init__()
-        self.user = user
+        self.user = user_info['user']
+        self.stores = user_info['stores'].keys()
+        self.storeIds = user_info['stores']
         self.file_name = ""
         self.store_name = ""
         self.init_ui()
@@ -52,7 +53,7 @@ class VideoPage(QWidget):
         self.choose_store_input = QComboBox()
         self.choose_store_input.setFixedWidth(INPUT_WIDTH)
         self.choose_store_input.setPlaceholderText('Choose store')
-        self.choose_store_input.addItems(firebase.getStoreNames(self.user))
+        self.choose_store_input.addItems(self.stores)
         
         self.heatmap_label = QLabel('Generate Heatmap')
         self.heatmap_label.setObjectName("heatmap_label")
@@ -100,6 +101,7 @@ class VideoPage(QWidget):
 
     def handle_process_video(self):
         self.store_name = self.choose_store_input.currentText()
+        self.store_id = self.storeIds[self.store_name]
         if self.is_empty(self.file_name) or self.is_empty(self.user) or self.is_empty(self.store_name):
             error_message = QMessageBox()
             error_message.setIcon(QMessageBox.Critical)
@@ -110,7 +112,7 @@ class VideoPage(QWidget):
 
             self.thread = QThread()
             # Step 3: Create a worker object
-            self.worker = Worker(self.user, self.file_name, self.choose_store_input.currentText(), 
+            self.worker = Worker(self.user, self.file_name, self.choose_store_input.currentText(), self.store_id,
                                  self.set_datetime_input.dateTime().toPyDateTime(), self.heatmap_checkbox.isChecked())
             # Step 4: Move worker to the thread
             self.worker.moveToThread(self.thread)
@@ -131,14 +133,15 @@ class Worker(QObject):
     finished = pyqtSignal()
     progress = pyqtSignal(int)
 
-    def __init__(self, user, file_name, store_name, date_time, heatmap_checked):
+    def __init__(self, user, file_name, store_name, store_id, date_time, heatmap_checked):
         QObject.__init__(self)
         self.user = user
         self.file_name = file_name
         self.store_name = store_name
+        self.store_id = store_id
         self.date_time = date_time
         self.heatmap_checked = heatmap_checked
 
     def run(self):
-        computer_vision.process_video(self.file_name, 10, self.user, self.store_name, self.date_time, self.heatmap_checked)
+        computer_vision.process_video(self.file_name, 10, self.user, self.store_name, self.store_id, self.date_time, self.heatmap_checked)
         self.finished.emit()

@@ -4,8 +4,9 @@ from firebase_admin import credentials, firestore, storage
 import datetime
 import os
 import numpy as np
+from PIL import Image
 
-TEMP_HEATMAP_LOCATION = os.path.join("heatmaps, heatmap.npy")
+TEMP_HEATMAP_LOCATION = os.path.join("heatmaps, heatmap.png")
 
 firebaseConfig = {
   "apiKey": "AIzaSyBxDTNJ-jV6_ln3tSCyASYYacMcESgZtRk",
@@ -24,7 +25,7 @@ auth = firebase.auth()
 def authWithMail(email, password):
     try:
         user = auth.sign_in_with_email_and_password(email, password)
-        return user["email"]
+        return user["localId"]
     except:
         return ""
 
@@ -37,34 +38,36 @@ app = firebase_admin.initialize_app(cred, {'storageBucket': 'vigilant-36758.apps
 all_db = firestore.client()
 bucket = storage.bucket(app=app)
 
-def getStoreNames(username):
-    store_names = []
-    arr = all_db.collection("users").document(username).collection("stores").stream()
-
+def getStores(userId):
+    stores = {}
+    arr = all_db.collection("users").document(userId).collection("stores").stream()
     for a in arr:
-        store_names.append(a.to_dict()["store_name"])
-    
-    return store_names
+        stores[a.to_dict()["storeName"]] =  a.id
+            
+    return stores
 
-def sendToDb(frames_arr:dict, username:str, store_name:str, date:datetime.datetime ):
+def sendToDb(frames_arr:dict, username:str, store_id:str, date:datetime.datetime ):
+    doc = all_db.collection("users").document(username).collection("stores").document(store_id).collection("data").document(f"{date.day}_{date.month}_{date.year}")
+    if doc.get().exists:
+        data = doc.get().to_dict()
+        data["frames"] += frames_arr
+    else:
+        data = {
+                "storeName": store_id,
+                "frames": frames_arr
+            }
+    
+    arr = all_db.collection("users").document(username).collection("stores").document(store_id).collection("data").document(f"{date.day}_{date.month}_{date.year}").set(data)
 
-    data = {
-            "storeName": store_name,
-            "frames": frames_arr
-        }
+def send_heatmap(heatmap:np.ndarray, username:str, store_name:str, date, camera_name:str):
     
-    arr = all_db.collection("users").document(username).collection("stores").document(store_name).collection("data").document(f"{date.day}_{date.month}_{date.year}").set(data)
-
-def send_heatmap(heatmap:dict, username:str, store_name:str, camera_name:str):
-    
-    timestamp = heatmap["timestamp"]
-    heatmap_nparray = heatmap["heatmap"]
-    
-    file_name_firebase = f"view_{timestamp}.npy" if camera_name == None else f"{camera_name}_{timestamp}.json"
+    file_name_firebase = f"view_{date}.png" if camera_name == None else f"{camera_name}_{date}.png"
     file_path_firebase = f"{username}/{store_name}/{file_name_firebase}"
     
     blob = bucket.blob(file_path_firebase)
     
-    np.save(TEMP_HEATMAP_LOCATION, heatmap_nparray)
+    heatmap_image = Image.fromarray(heatmap)
+    heatmap_image.save(TEMP_HEATMAP_LOCATION)
+    
     blob.upload_from_filename(TEMP_HEATMAP_LOCATION)
     os.remove(TEMP_HEATMAP_LOCATION)

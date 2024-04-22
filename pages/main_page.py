@@ -7,9 +7,9 @@ heatmap_image_path = 'images/heatmap.png'
 emotion_image_path = 'images/emotion.jpeg'
 
 class MainPage(QWidget):
-    def __init__(self, user):
+    def __init__(self, user_info):
         super().__init__()
-        self.user = user
+        self.user_info = user_info
         self.init_ui()
 
     def init_ui(self):
