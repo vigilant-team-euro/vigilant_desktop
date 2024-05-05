@@ -11,7 +11,7 @@ class MainWindow(QMainWindow):
       self.init_ui()
 
    def init_ui(self):
-      self.setWindowTitle('Main Window')
+      self.setWindowTitle('Vigilant Desktop Application')
       self.setGeometry(300, 300, 1350, 900)
 
       menubar = self.menuBar()

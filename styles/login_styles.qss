@@ -1,6 +1,6 @@
 /* Example style */
 QDialog {
-    background-color: #2a3447;
+    background-color: #051d41;
     border: 1px solid #ccc;
     border-radius: 10px;
 }
@@ -27,11 +27,10 @@ QLabel#description_label {
 
 QLineEdit {
     font-size: 20px;
-    padding: 5px;
+    padding: 8px;
     margin: 5px;
     border: 1px solid #ccc;
     border-radius: 10px;
-    max-width: 300px;
 }
 
 QPushButton#login_button {
