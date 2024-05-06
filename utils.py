@@ -110,7 +110,7 @@ def construct_rtsp_url(camera_name):
     
     return f"rtsp://{username}:{password}@{ip_address}:{port}/stream2"
 
-def show_live_footage(camera_name):
+def show_live_footage(camera_name, spinner):
     error = ""
     
     rtsp_url = construct_rtsp_url(camera_name)
@@ -121,23 +121,20 @@ def show_live_footage(camera_name):
         error = "Failed to open RTSP stream"
         return error
 
+    spinner.accept()
+    
     while True:
-        # Read a frame from the RTSP stream
         ret, frame = cap.read()
 
-        # Check if the frame is read correctly
         if not ret:
             error = "Failed to read frame"
             return error
-
-        # Display the frame
+        
         cv2.imshow("RTSP Stream", frame)
 
-        # Press 'q' to quit
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-
-    # Release the RTSP stream and close the window
+        
     cap.release()
     cv2.destroyAllWindows()
     return error

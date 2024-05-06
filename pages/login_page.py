@@ -21,7 +21,6 @@ class LoginScreen(QDialog):
         self.setGeometry(login_screen_x, login_screen_y, login_screen_width, login_screen_height)
         self.center_on_screen()
         
-        
         main_layout = QHBoxLayout()
         
         pixmap = QPixmap(login_image_path)

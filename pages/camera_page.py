@@ -263,15 +263,15 @@ class CameraPage(QWidget):
       success_message = QMessageBox()
       success_message.setIcon(QMessageBox.Information)
       success_message.setWindowTitle("Success")
-      success_message.setText("Camera added successfully!")
+      success_message.setText("Camera deleted successfully!")
       success_message.exec_()
       
    def handle_show_live_footage(self, camera_name):
       
-      self.thread = self.LiveFootageThread(camera_name)
+      self.spinner_dialog = SpinnerDialog(f"Connecting to {camera_name}...")
+      self.thread = self.LiveFootageThread(camera_name, self.spinner_dialog)
       self.thread.finished.connect(self.on_live_footage_finished)
       
-      self.spinner_dialog = SpinnerDialog(f"Connecting to {camera_name}...")
       self.spinner_dialog.show()
     
       self.thread.start()
@@ -324,8 +324,6 @@ class CameraPage(QWidget):
          self.worker.moveToThread(self.thread)
          self.thread.started.connect(self.worker.run)
          self.worker.finished.connect(self.thread.quit)
-         # self.worker.finished.connect(self.worker.deleteLater)
-         # self.thread.finished.connect(self.thread.deleteLater)
          self.thread.start()
          self.spinner_dialog = CameraSpinnerDialog(f"Processing footage for {camera_name} ...", self.worker)
          self.spinner_dialog.show()
@@ -359,8 +357,8 @@ class CameraPage(QWidget):
          
          self.ip_addresses.append(camera["ip_address"])
       
-      self.set_column_read_only(self.table, 0) # Make the camera name column read-only
-      self.set_column_read_only(self.table, 2)  # Make the store name column read-only
+      self.set_column_read_only(self.table, 0)
+      self.set_column_read_only(self.table, 2)
 
    def is_empty(self, value):
       return len(value) == 0
@@ -403,12 +401,13 @@ class CameraPage(QWidget):
       
       finished = pyqtSignal(str)
 
-      def __init__(self, camera_name):
+      def __init__(self, camera_name, spinner):
          super().__init__()
          self.camera_name = camera_name
+         self.spinner = spinner
 
       def run(self):
-         error = utils.show_live_footage(self.camera_name)
+         error = utils.show_live_footage(self.camera_name, self.spinner)
          self.finished.emit(error)
    
 class Worker(QObject):
