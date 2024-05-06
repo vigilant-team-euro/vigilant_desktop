@@ -65,17 +65,21 @@ def pushRandomData(username:str, storename:str, day:int, month:int, year:int, in
 
 
 if __name__ == '__main__':
-    month = 4
-    pushRandomData("F3sSGpLf1YORxmOPuniEBCUZrH22", "17kG38Y5tTJWh74TyM84", 21, month, 2024, 3)
-    pushRandomData("F3sSGpLf1YORxmOPuniEBCUZrH22", "17kG38Y5tTJWh74TyM84", 22, month, 2024, 5)
-    pushRandomData("F3sSGpLf1YORxmOPuniEBCUZrH22", "17kG38Y5tTJWh74TyM84", 23, month, 2024, 10)
-    pushRandomData("F3sSGpLf1YORxmOPuniEBCUZrH22", "17kG38Y5tTJWh74TyM84", 24, month, 2024, 15)
-    pushRandomData("F3sSGpLf1YORxmOPuniEBCUZrH22", "17kG38Y5tTJWh74TyM84", 25, month, 2024, 20)
-    pushRandomData("F3sSGpLf1YORxmOPuniEBCUZrH22", "17kG38Y5tTJWh74TyM84", 26, month, 2024, 6)
-    pushRandomData("F3sSGpLf1YORxmOPuniEBCUZrH22", "17kG38Y5tTJWh74TyM84", 27, month, 2024, 12)
-    pushRandomData("F3sSGpLf1YORxmOPuniEBCUZrH22", "17kG38Y5tTJWh74TyM84", 28, month, 2024, 5)
-    pushRandomData("F3sSGpLf1YORxmOPuniEBCUZrH22", "17kG38Y5tTJWh74TyM84", 29, month, 2024, 10)
-    pushRandomData("F3sSGpLf1YORxmOPuniEBCUZrH22", "17kG38Y5tTJWh74TyM84", 30, month, 2024, 10)
+
+    month = 5
+    userId = "F3sSGpLf1YORxmOPuniEBCUZrH22"
+    storeId = "EjqCghHgeWNCr0bLNgSx"
+
+    pushRandomData(userId, storeId, 1, month, 2024, 3)
+    pushRandomData(userId, storeId, 2, month, 2024, 5)
+    pushRandomData(userId, storeId, 3, month, 2024, 10)
+    pushRandomData(userId, storeId, 4, month, 2024, 15)
+    pushRandomData(userId, storeId, 5, month, 2024, 20)
+    pushRandomData(userId, storeId, 6, month, 2024, 6)
+    pushRandomData(userId, storeId, 7, month, 2024, 12)
+    pushRandomData(userId, storeId, 8, month, 2024, 5)
+    pushRandomData(userId, storeId, 9, month, 2024, 10)
+    pushRandomData(userId, storeId, 10, month, 2024, 10)
 
     # pushRandomData("F3sSGpLf1YORxmOPuniEBCUZrH22", "8rhk8kbOqpZmFYTARwgo", 15, month, 2024, 240)
     # pushRandomData("F3sSGpLf1YORxmOPuniEBCUZrH22", "8rhk8kbOqpZmFYTARwgo", 16, month, 2024, 480)
