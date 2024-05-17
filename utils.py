@@ -108,7 +108,7 @@ def construct_rtsp_url(camera_name):
     
     connection.close()
     
-    return f"rtsp://{username}:{password}@{ip_address}:{port}/stream2"
+    return f"rtsp://{username}:{password}@{ip_address}:{port}/stream1"
 
 def show_live_footage(camera_name, spinner):
     error = ""
